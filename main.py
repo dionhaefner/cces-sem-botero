@@ -36,7 +36,7 @@ if __name__ == '__main__':
 	t, R, P, A, B = 0, 1, 1, 1, 0
 
 	plt.figure()
-	t0 = np.arange(0,R*100,R/10)
+	t0 = np.arange(0,R*100,float(R)/10)
 	env = np.array(list(map(lambda x: environment(x,R,P,A,B),t0)))
 	plt.plot(t0,env[:,0],label='E')
 	plt.plot(t0,env[:,1],'.',label='C')
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 		population.breed_constant()
 		population.react(E,C,1)
 
-		animals = population.animals()
+		#animals = population.animals()
 		# I0 = [animal.genes['I0'] for animal in animals]
 		# plt.figure()
 		# plt.hist(I0,bins=100)
@@ -68,12 +68,12 @@ if __name__ == '__main__':
 		# plt.savefig('timeseries/I0_'+str(j+1)+'.png')
 		# plt.close()
 
-		b = [animal.genes['b'] for animal in animals]
-		plt.figure()
-		plt.hist(b,bins=100)
-		plt.xlim((-2,2))
-		plt.savefig('timeseries/b_'+str(j+1)+'.png')
-		plt.close()
+		#b = [animal.genes['b'] for animal in animals]
+		#plt.figure()
+		#plt.hist(b,bins=100)
+		#plt.xlim((-2,2))
+		#plt.savefig('timeseries/b_'+str(j+1)+'.png')
+		#plt.close()
 
 		print("Generation {0} of {1} done!".format(j+1,constants.generations))
 		end = time.clock()
