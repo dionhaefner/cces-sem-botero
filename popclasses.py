@@ -142,9 +142,8 @@ class Population:
 		else:
 			payoff_factor = lifetime_payoff/mean_payoff
 
-		new_animals = map(self._breed,self._animals,payoff_factor)
+		new_animals = [self._breed(animal,payoff) for animal,payoff in zip(self._animals,payoff_factor)]
 		new_animals = [item for sublist in new_animals for item in sublist]
-
 
 		N = len(new_animals)
 		print("Population size: {0}".format(N))

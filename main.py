@@ -60,20 +60,13 @@ if __name__ == '__main__':
 		population.breed_constant()
 		population.react(E,C,1)
 
-		animals = population.animals()
-		# I0 = [animal.genes['I0'] for animal in animals]
-		# plt.figure()
-		# plt.hist(I0,bins=100)
-		# plt.xlim((-2,2))
-		# plt.savefig('timeseries/I0_'+str(j+1)+'.png')
-		# plt.close()
-
-		b = [animal.genes['b'] for animal in animals]
 		plt.figure()
-		plt.hist(b,bins=100)
-		plt.xlim((-2,2))
-		plt.savefig('timeseries/b_'+str(j+1)+'.png')
-		plt.close()
+		animals = population.animals()
+		genes = list(map(lambda x: x.genes, animals))
+		data = pd.DataFrame(genes)
+		sns.violinplot(data)
+		plt.ylim(-2,2)
+		plt.savefig('timeseries/genes_'+str(j+1)+'.png')
 
 		print("Generation {0} of {1} done!".format(j+1,constants.generations))
 		end = time.clock()
