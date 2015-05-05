@@ -2,7 +2,7 @@
 import numpy as np # For efficient array operations
 import matplotlib as mpl
 import matplotlib.pyplot as plt # For plotting
-import seaborn as sns # Makes prettier plots
+#import seaborn as sns # Makes prettier plots
 import time # For timing parts of the script, optimizing run time
 import profile
 import pandas as pd
@@ -15,8 +15,8 @@ from environment import * # Import environment model
 
 
 if __name__ == '__main__':
-	sns.set_palette("deep", desat=.6)
-	sns.set_context(rc={"figure.figsize": (10, 7.5)})
+	#sns.set_palette("deep", desat=.6)
+	#sns.set_context(rc={"figure.figsize": (10, 7.5)})
 
 	#################################
 	############# START #############
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	population = Population(constants.population_size,animal_list)
 
 	# set some variable model parameters:
-	t, R, P, A, B = 0, 1, 1, 1, 0
+	t, R, P, A, B = 0, 100, 1, 1, 0
 
 	plt.figure()
 	t0 = np.arange(0,R*100,float(R)/10)
@@ -60,30 +60,15 @@ if __name__ == '__main__':
 		population.breed_constant()
 		population.react(E,C,1)
 
-<<<<<<< HEAD
 		plt.figure()
 		animals = population.animals()
 		genes = list(map(lambda x: x.genes, animals))
 		data = pd.DataFrame(genes)
-		sns.violinplot(data)
+		data.boxplot()
 		plt.ylim(-2,2)
 		plt.savefig('timeseries/genes_'+str(j+1)+'.png')
-=======
-		#animals = population.animals()
-		# I0 = [animal.genes['I0'] for animal in animals]
-		# plt.figure()
-		# plt.hist(I0,bins=100)
-		# plt.xlim((-2,2))
-		# plt.savefig('timeseries/I0_'+str(j+1)+'.png')
-		# plt.close()
+		plt.close()
 
-		#b = [animal.genes['b'] for animal in animals]
-		#plt.figure()
-		#plt.hist(b,bins=100)
-		#plt.xlim((-2,2))
-		#plt.savefig('timeseries/b_'+str(j+1)+'.png')
-		#plt.close()
->>>>>>> origin/master
 
 		print("Generation {0} of {1} done!".format(j+1,constants.generations))
 		end = time.clock()

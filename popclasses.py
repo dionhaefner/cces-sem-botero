@@ -1,6 +1,7 @@
 import numbers # To check if a type is numeric
 import numpy as np
 import time
+import copy
 
 from constants import model_constants # Import model constants
 
@@ -99,7 +100,9 @@ class Population:
 
 	# Calculates the insulation of each Animal in the Population based on cue C and environment E
 	def react(self,E,C,*args):
-		for (i,animal) in enumerate(self._animals):
+		new_animals = np.copy(self._animals)
+
+		for animal in new_animals:
 			if (len(args) > 0):
 				a = args[0]
 			else:
@@ -111,11 +114,10 @@ class Population:
 					new_insulation = animal.genes['I0']+animal.genes['b']*C
 				else:
 					new_insulation = animal.genes['I0p']+animal.genes['bp']*C
-				self._animals[i].insulation = new_insulation
-				self._animals[i].adjustments = self._animals[i].adjustments + 1
-
-			self._animals[i].mismatch = self._animals[i].mismatch + np.abs(self._animals[i].insulation-E)
-
+				animal.insulation = new_insulation
+				animal.adjustments = animal.adjustments + 1
+			animal.mismatch = animal.mismatch + np.abs(animal.insulation-E)
+		self._animals = new_animals
 
 	# Calculates the lifetime payoff of a single Animal animal.
 	def _lifetime_payoff(self,animal):
@@ -143,14 +145,17 @@ class Population:
 			payoff_factor = lifetime_payoff/mean_payoff
 
 		new_animals = [self._breed(animal,payoff) for animal,payoff in zip(self._animals,payoff_factor)]
-		new_animals = [item for sublist in new_animals for item in sublist]
+		new_animals = np.array([item for sublist in new_animals for item in sublist])
 
 		N = len(new_animals)
 		print("Population size: {0}".format(N))
 		if (N > self._constants.population_size):
 			new_animals = np.random.choice(new_animals,self._constants.population_size,replace=False)
 		elif (N < self._constants.population_size):
-			new_animals = np.concatenate((new_animals,np.random.choice(new_animals,self._constants.population_size - N)))
+			random_animals = np.array(np.random.randint(0,N,self._constants.population_size - N))
+			clones = new_animals[random_animals]
+			clones = map(copy.deepcopy,clones)
+			new_animals = np.append(new_animals,clones)
 
 		self._animals = new_animals
 
@@ -173,6 +178,6 @@ class Population:
 		self._size = len(new_animals)
 
 	def _breed(self,animal,payoff_factor):
-		offspring = np.random.poisson(lam=payoff_factor)
+		offspring = np.random.poisson(lam=payoff_factor)	
 		new_animals = [Animal(animal.genes.mutate()) for _ in range(offspring)]
 		return new_animals
