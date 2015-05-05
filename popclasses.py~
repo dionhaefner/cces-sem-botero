@@ -2,6 +2,7 @@ import numbers # To check if a type is numeric
 import numpy as np
 import time
 from copy import deepcopy
+
 from constants import model_constants # Import model constants
 
 # Implement classes
