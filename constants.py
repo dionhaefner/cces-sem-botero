@@ -1,6 +1,3 @@
-from collections import namedtuple
-
 def model_constants():
-	Constants = namedtuple('Constants', ['population_size', 'generations', 'L', 'kd', 'ka', 'tau', 'q', 'mu'])
-	constants = Constants(5000, 1000, 5, 0.02, 0.01, 0.25, 2.2, 0.001)
+	constants = {"population_size": 5000, "generations": 1000, "L": 5, "kd": 0.02, "ka": 0.01, "tau": 0.25, "q": 2.2, "mu": 0.001}
 	return constants

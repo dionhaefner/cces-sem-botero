@@ -1,137 +1,108 @@
+#
 # Import packages
+#
+
 import numpy as np # For efficient array operations
-import matplotlib as mpl
 import matplotlib.pyplot as plt # For plotting
 import time # For timing parts of the script, optimizing run time
-import profile
-import pandas as pd
-#import multiprocessing
-#from multiprocessing.pool import ThreadPool
+import profile # Profiling, reveals performance bottlenecks
+import pandas as pd # Easier data handling
+import os # To create directories
+import datetime # To access the current time
+import sys # To access command line arguments
 
-try:
-	import seaborn as sns # Makes prettier plots
+try: # Seaborn makes prettier plots, but is not installed in a fresh Anaconda python
+	import seaborn as sns 
 	have_seaborn = True
 except ImportError:
 	have_seaborn = False
 
+#
 # Import other parts of the project
+#
+
 from popclasses import * # Import custom classes
 from constants import model_constants # Import model constants
-from environment import * # Import environment model
-
-
-timeseries = False
-
-def iterate_population(k,population,constants,t,R,P,A,B):
-	for j in np.arange(constants.generations):
-		# Start timer
-		start = time.clock()
-
-		for i in range(constants.L):
-
-			E, C = environment(t,R,P,A,B)
-			population.react(E,C)
-			t = t+1
-
-		population.breed_constant()
-		population.react(E,C,1)
-
-
-		if timeseries:
-			plt.figure()
-			animals = population.animals()
-			genes = list(map(lambda x: x.genes, animals))
-			data = pd.DataFrame(genes)
-		
-			if have_seaborn:
-				sns.violinplot(data)
-			else:
-				data.boxplot()
-		
-			plt.ylim(-2,2)
-			plt.savefig('timeseries/pop'+str(k+1)+'_genes_'+str(j+1)+'.png')
-			plt.close()
-
-
-		print("Pop {2}: Generation {0} of {1} done!".format(j+1,constants.generations,k+1))
-		end = time.clock()
-		print("Computation time: {0:.3e} s\n".format(end-start))
-
-
-	I0, b, I0p, bp = [], [], [], []
-	for animal in population.animals():
-		I0.append(animal.genes['I0'])
-		b.append(animal.genes['b'])
-		I0p.append(animal.genes['I0p'])
-		bp.append(animal.genes['bp'])
-
-	I0, b = np.array(I0), np.array(b)
-
-	C = np.linspace(-1,1,200)
-
-
-	plt.figure()
-	plt.plot(C,np.mean(I0)+np.mean(b)*C)
-	plt.plot(C,np.mean(I0p)+np.mean(bp)*C)
-	plt.savefig('pop'+str(k+1)+'_mean.png')
-
-	plt.figure()
-	animals = population.animals()
-	genes = list(map(lambda x: x.genes, animals))
-	data = pd.DataFrame(genes)
-		
-	if have_seaborn:
-		sns.violinplot(data)
-	else:
-		data.boxplot()
-
-	plt.ylim(-2,2)
-	plt.savefig('pop'+str(k+1)+'_finalgenes.png')
-	plt.close()
+from environment import * # Environment model
+from iterate_population import iterate_population # Main controller for population iteration
 
 
 
-if __name__ == '__main__':
-#def main():
-	if have_seaborn:
+
+
+# Get model constants
+constants = model_constants()
+
+# Get parameters from command line
+arguments = sys.argv[1:]
+if ((len(arguments) != 6) & (len(arguments) != 7)):
+	print("Usage: main.py [populations] [R] [P] [A] [B] [timeseries] [profiling (optional)]")
+	print("E.g. $ python main.py 100 1 0 1 0 True")
+	sys.exit(0)
+else:
+	try:
+		populations, R, P, A, B, timeseries = list(map(int,arguments[0:6]))
+		if len(arguments) == 7:
+			run_profile = True
+		else:
+			run_profile = False
+	except TypeError:
+		print("Usage: main.py [populations] [R] [P] [A] [B] [timeseries] [profiling (optional)]")
+		print("E.g. $ python main.py 100 1 0 1 0 True")
+		sys.exit(0)
+
+
+def main():
+	if have_seaborn: # initialize seaborn
 		sns.set_palette("deep", desat=.6)
 		sns.set_context(rc={"figure.figsize": (10, 7.5)})
 
-	#pool = ThreadPool(processes=2)
+	# create output directory
+	now = datetime.datetime.today()
+	path = "./output/R{0}-P{1}-A{2}-B{3}_{4:%y}-{4:%m}-{4:%d}_{4:%H}-{4:%M}-{4:%S}/".format(R,P,A,B,now)
+	try: 
+		os.makedirs(path)
+		os.makedirs(path+"timeseries/")
+	except OSError:
+		if not os.path.isdir(path):
+			raise
 
-	#################################
-	############# START #############
-	#################################
+	for k in range(populations):
+		start = time.clock()
 
+		# create a population of population_size animals that already have the correct random genes
+		animal_list = [Animal() for _ in range(constants["population_size"])]
 
-	# Get model constants
-	constants = model_constants()
+		# create a Population from animal_list
+		population = Population(constants["population_size"],animal_list)
 
-	# Now lets create a population of population_size animals that already have the correct random genes:
-	animal_list = [Animal() for _ in range(constants.population_size)]
+		# plot environment
+		plt.figure()
+		t0 = np.arange(0,R*100,float(R)/10)
+		env = np.array(list(map(lambda x: environment(x,R,P,A,B),t0)))
+		plt.plot(t0,env[:,0],label='E')
+		plt.plot(t0,env[:,1],'.',label='C')
+		plt.legend()
+		plt.savefig(path+'environment.png')
 
-	# create a Population from animal_list
-	population = Population(constants.population_size,animal_list)
+		plt.figure()
+		plt.hist(env[:,1],bins=100)
+		plt.savefig(path+'cues.png')
 
-	# set some variable model parameters:
-	t, R, P, A, B = 0, 100, 0, 1, 0
+		end = time.clock()
+		print("Set-up time: {0}\n".format(end-start))
+		start = time.clock()
+		
+		# iterate on the population and create outputs
+		iterate_population(k,population,R,P,A,B,path)
 
-	processes = range(1)
+		end = time.clock()
+		print("\n---------------------------------------")
+		print(" Population {0} done! Total time: {1:.2f} min".format(k+1,(end-start)/60))
+		print("---------------------------------------\n")
 
-
-	plt.figure()
-	t0 = np.arange(0,R*100,float(R)/10)
-	env = np.array(list(map(lambda x: environment(x,R,P,A,B),t0)))
-	plt.plot(t0,env[:,0],label='E')
-	plt.plot(t0,env[:,1],'.',label='C')
-	plt.legend()
-	plt.savefig('environment.png')
-
-	plt.figure()
-	plt.hist(env[:,1],bins=100)
-	plt.savefig('cues.png')
-	
-	mainfun = lambda k: iterate_population(k,population,constants,t,R,P,A,B)
-	map(mainfun, processes)
-
-#profile.run("main()")
+if __name__ == '__main__':
+	if run_profile:
+		profile.run("main()")
+	else:
+		main()

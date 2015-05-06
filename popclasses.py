@@ -23,7 +23,7 @@ class Genome(dict):
 			raise TypeError('Argument must be a list of 7 numbers.')
 
 	def mutate(self):
-		mu = self._constants.mu
+		mu = self._constants["mu"]
 
 		for gene in ['h','s','I0','I0p']:
 			r = np.random.rand()
@@ -97,40 +97,37 @@ class Population:
 	def size(self):
 		return self._size
 
-	# Calculates the insulation of each Animal in the Population based on cue C and environment E
-	def react(self,E,C,*args):
-		new_animals = np.copy(self._animals)
-
-		for animal in new_animals:
-			if (len(args) > 0):
-				a = args[0]
+	def _calc_insulation(self,animal,r,E,C,evolve_all):
+		if ((r[0] <= animal.genes['a']) | evolve_all):
+			if (r[1] <= animal.genes['h']):
+				new_insulation = animal.genes['I0']+animal.genes['b']*C
 			else:
-				a = animal.genes['a']
-			r = np.random.rand()
-			if (r <= a):
-				r = np.random.rand()
-				if (r <= animal.genes['h']):
-					new_insulation = animal.genes['I0']+animal.genes['b']*C
-				else:
-					new_insulation = animal.genes['I0p']+animal.genes['bp']*C
-				animal.insulation = new_insulation
-				animal.adjustments = animal.adjustments + 1
-			animal.mismatch = animal.mismatch + np.abs(animal.insulation-E)
-		self._animals = new_animals
+				new_insulation = animal.genes['I0p']+animal.genes['bp']*C
+			animal.insulation = new_insulation
+			animal.adjustments = animal.adjustments + 1
+		animal.mismatch = animal.mismatch + np.abs(animal.insulation-E)
+
+
+	# Calculates the insulation of each Animal in the Population based on cue C and environment E
+	def react(self,E,C,evolve_all=False):
+		r = np.random.rand(self._constants['population_size'],2)
+		fun = lambda x: self._calc_insulation(x[0],x[1],E,C,evolve_all)
+		map(fun,zip(self._animals,r))
+
 
 	# Calculates the lifetime payoff of a single Animal animal.
 	def _lifetime_payoff(self,animal):
-		tau = self._constants.tau
+		tau = self._constants["tau"]
 		if (animal.genes['s'] <= 0.5):
 			return np.exp(-tau*animal.mismatch)
 		else:	
-			return max(np.exp(-tau*animal.mismatch) - self._constants.kd - animal.adjustments * self._constants.ka, 0)
+			return max(np.exp(-tau*animal.mismatch) - self._constants["kd"] - animal.adjustments * self._constants["ka"], 0)
 
 	def _max_payoff(self,animal):
 		if (animal.genes['s'] <= 0.5):
 			return 1
 		else:
-			return max(1 - self._constants.kd - animal.adjustments * self._constants.ka, 0)
+			return max(1 - self._constants["kd"] - animal.adjustments * self._constants["ka"], 0)
 
 	# Iterates the entire Population to a new generation, calculating the number of offspring of each Animal.
 	def breed_constant(self):
@@ -138,8 +135,7 @@ class Population:
 		mean_payoff = np.mean(lifetime_payoff)
 
 		if (mean_payoff == 0):
-			print(self._animals[0].mismatch)
-			print(self._animals[0].insulation)
+			raise RuntimeError("Mean payoff of population decreased to 0. Check your parameters!")
 		else:
 			payoff_factor = lifetime_payoff/mean_payoff
 
@@ -148,12 +144,12 @@ class Population:
 
 		N = len(new_animals)
 		print("Population size: {0}".format(N))
-		if (N > self._constants.population_size):
-			new_animals = np.random.choice(new_animals,self._constants.population_size,replace=False)
-		elif (N < self._constants.population_size):
-			clones = np.random.choice(new_animals,self._constants.population_size - N)
-			clones = map(deepcopy,clones)
-			new_animals = np.append((new_animals,clones))
+		if (N > self._constants["population_size"]):
+			new_animals = np.random.choice(new_animals,self._constants["population_size"],replace=False)
+		elif (N < self._constants["population_size"]):
+			clones = np.random.choice(new_animals,self._constants["population_size"] - N)
+			clones = list(map(deepcopy,clones))
+			new_animals = np.append(new_animals,clones)
 
 		self._animals = new_animals
 
@@ -169,8 +165,8 @@ class Population:
 		new_animals = [item for sublist in new_animals for item in sublist]
 
 		N = len(new_animals)
-		if (N > self._constants.population_size):
-			new_animals = np.random.choice(new_animals,self._constants.population_size)
+		if (N > self._constants["population_size"]):
+			new_animals = np.random.choice(new_animals,self._constants["population_size"],replace=False)
 
 		self._animals = new_animals
 		self._size = len(new_animals)
