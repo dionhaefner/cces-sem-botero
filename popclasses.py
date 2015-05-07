@@ -92,22 +92,22 @@ class Population:
 	def size(self):
 		return self._size
 
-	def _calc_insulation(self,animal,r,E,C,evolve_all):
-		if ((r[0] <= animal.genes['a']) | evolve_all):
-			if (r[1] <= animal.genes['h']):
-				new_insulation = animal.genes['I0']+animal.genes['b']*C
-			else:
-				new_insulation = animal.genes['I0p']+animal.genes['bp']*C
-			animal.insulation = new_insulation
-			animal.adjustments = animal.adjustments + 1
-		animal.mismatch = animal.mismatch + np.abs(animal.insulation-E)
-
-
 	# Calculates the insulation of each Animal in the Population based on cue C and environment E
 	def react(self,E,C,evolve_all=False):
-		r = np.random.rand(self._constants['population_size'],2)
-		fun = lambda x: self._calc_insulation(x[0],x[1],E,C,evolve_all)
-		map(fun,zip(self._animals,r))
+		new_animals = self._animals
+
+		for animal in new_animals:
+			r = np.random.rand()
+			if ((r <= animal.genes['a']) | evolve_all):
+				r = np.random.rand()
+				if (r <= animal.genes['h']):
+					new_insulation = animal.genes['I0']+animal.genes['b']*C
+				else:
+					new_insulation = animal.genes['I0p']+animal.genes['bp']*C
+				animal.insulation = new_insulation
+				animal.adjustments = animal.adjustments + 1
+			animal.mismatch = animal.mismatch + np.abs(animal.insulation-E)
+		self._animals = new_animals
 
 
 	# Calculates the lifetime payoff of a single Animal animal.
@@ -152,7 +152,7 @@ class Population:
 		self._animals = new_animals
 
 
-	def breed_variable(self):
+	def breed_variable(self): 
 		calc_payoff = np.vectorize(self._lifetime_payoff)
 		lifetime_payoff = calc_payoff(self._animals)
 		calc_payoff = np.vectorize(self._max_payoff)

@@ -40,7 +40,7 @@ if (len(arguments) != 6):
 	sys.exit(0)
 else:
 	try:
-		populations, timeseries = int(arguments[0]), bool(arguments[5])
+		populations, timeseries = int(arguments[0]), arguments[5].lower() in ("true", "t", "1", "True")
 		R, P, A, B = list(map(float,arguments[1:5]))
 	except ValueError:
 		print("Usage: main.py [populations] [R] [P] [A] [B] [output timeseries]")
