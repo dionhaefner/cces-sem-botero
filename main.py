@@ -5,7 +5,6 @@
 import numpy as np # For efficient array operations
 import matplotlib.pyplot as plt # For plotting
 import time # For timing parts of the script, optimizing run time
-import profile # Profiling, reveals performance bottlenecks
 import pandas as pd # Easier data handling
 import os # To create directories
 import datetime # To access the current time
@@ -35,24 +34,21 @@ constants = model_constants()
 
 # Get parameters from command line
 arguments = sys.argv[1:]
-if ((len(arguments) != 6) & (len(arguments) != 7)):
-	print("Usage: main.py [populations] [R] [P] [A] [B] [timeseries] [profiling (optional)]")
-	print("E.g. $ python main.py 100 1 0 1 0 True")
+if (len(arguments) != 6):
+	print("Usage: main.py [populations] [R] [P] [A] [B] [output timeseries]")
+	print("E.g. $ python main.py 100 1 0 1 0 0")
 	sys.exit(0)
 else:
 	try:
-		populations, R, P, A, B, timeseries = list(map(int,arguments[0:6]))
-		if len(arguments) == 7:
-			run_profile = True
-		else:
-			run_profile = False
-	except TypeError:
-		print("Usage: main.py [populations] [R] [P] [A] [B] [timeseries] [profiling (optional)]")
-		print("E.g. $ python main.py 100 1 0 1 0 True")
-		sys.exit(0)
+		populations, timeseries = int(arguments[0]), bool(arguments[5])
+		R, P, A, B = list(map(float,arguments[1:5]))
+	except ValueError:
+		print("Usage: main.py [populations] [R] [P] [A] [B] [output timeseries]")
+		print("E.g. $ python main.py 100 1 0 1 0 0\n")
+		raise
 
 
-def main():
+if __name__ == '__main__':
 	if have_seaborn: # initialize seaborn
 		sns.set_palette("deep", desat=.6)
 		sns.set_context(rc={"figure.figsize": (10, 7.5)})
@@ -67,6 +63,20 @@ def main():
 		if not os.path.isdir(path):
 			raise
 
+	# plot environment
+	plt.figure()
+	t0 = np.arange(0,R*100,float(R)/10)
+	env = np.array(list(map(lambda x: environment(x,R,P,A,B),t0)))
+	plt.plot(t0,env[:,0],label='E')
+	plt.plot(t0,env[:,1],'.',label='C')
+	plt.legend()
+	plt.savefig(path+'environment.png')
+
+	plt.figure()
+	plt.hist(env[:,1],bins=100)
+	plt.savefig(path+'cues.png')
+
+	means, stds = [], []
 	for k in range(populations):
 		start = time.clock()
 
@@ -76,33 +86,29 @@ def main():
 		# create a Population from animal_list
 		population = Population(constants["population_size"],animal_list)
 
-		# plot environment
-		plt.figure()
-		t0 = np.arange(0,R*100,float(R)/10)
-		env = np.array(list(map(lambda x: environment(x,R,P,A,B),t0)))
-		plt.plot(t0,env[:,0],label='E')
-		plt.plot(t0,env[:,1],'.',label='C')
-		plt.legend()
-		plt.savefig(path+'environment.png')
-
-		plt.figure()
-		plt.hist(env[:,1],bins=100)
-		plt.savefig(path+'cues.png')
-
 		end = time.clock()
 		print("Set-up time: {0}\n".format(end-start))
 		start = time.clock()
 		
 		# iterate on the population and create outputs
-		iterate_population(k,population,R,P,A,B,path)
+		pop_mean, pop_std = iterate_population(k,population,R,P,A,B,path,timeseries)
 
 		end = time.clock()
 		print("\n---------------------------------------")
 		print(" Population {0} done! Total time: {1:.2f} min".format(k+1,(end-start)/60))
 		print("---------------------------------------\n")
 
-if __name__ == '__main__':
-	if run_profile:
-		profile.run("main()")
+		plt.close('all')
+
+		means.append(pop_mean)
+		stds.append(pop_std)
+
+	plt.figure()
+	average = pd.concat(means)
+	if have_seaborn:
+		sns.violinplot(average)
 	else:
-		main()
+		average.boxplot()
+	plt.ylim(-2,2)
+	plt.savefig(path+"total_average.png")
+	plt.close()

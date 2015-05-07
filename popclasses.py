@@ -49,16 +49,16 @@ class Animal:
 	def __init__(self,*args):
 		if (len(args) > 0):
 			genes = args[0]
+			if not isinstance(genes,Genome):
+				raise TypeError('First argument must be of type Genome.')
 		else:
 			genes = self._random_genes()
 
-		if isinstance(genes,Genome):
-			self.genes = genes
-			self.mismatch = 0
-			self.adjustments = 0
-			self.insulation = genes['I0']
-		else:
-			raise TypeError('First argument must be of type Genome.')
+		self.genes = genes
+		self.mismatch = 0
+		self.adjustments = 0
+		self.insulation = genes['I0']
+			
 
 	def _random_genes(self):
 		rand_numbers = np.random.rand(6) # create 6 random genes in the interval [0,1)
@@ -72,7 +72,6 @@ class Animal:
 
 # Takes a population size and a list of Animal as input and delivers a Population.
 class Population:
-
 	# Constructor of the population
 	def __init__(self,size,animals):
 		if (isinstance(size,int) & (all(isinstance(x,Animal) for x in animals))):
@@ -88,10 +87,6 @@ class Population:
 	# Outputs the ndarray of Animal 
 	def animals(self):
 		return self._animals
-
-	# Changes a single Animal at list position i to Animal val
-	def update(self,i,val):
-		self._animals[i] = val
 
 	# Outputs the current size of the population
 	def size(self):
@@ -121,17 +116,18 @@ class Population:
 		if (animal.genes['s'] <= 0.5):
 			return np.exp(-tau*animal.mismatch)
 		else:	
-			return max(np.exp(-tau*animal.mismatch) - self._constants["kd"] - animal.adjustments * self._constants["ka"], 0)
+			return max(np.exp(-tau*animal.mismatch) - self._constants["kd"] - (animal.adjustments - 1)* self._constants["ka"], 0)
 
 	def _max_payoff(self,animal):
 		if (animal.genes['s'] <= 0.5):
 			return 1
 		else:
-			return max(1 - self._constants["kd"] - animal.adjustments * self._constants["ka"], 0)
+			return max(1 - self._constants["kd"] - (animal.adjustments - 1) * self._constants["ka"], 0)
 
 	# Iterates the entire Population to a new generation, calculating the number of offspring of each Animal.
 	def breed_constant(self):
-		lifetime_payoff = np.array(list(map(self._lifetime_payoff,self._animals)))
+		calc_payoff = np.vectorize(self._lifetime_payoff)
+		lifetime_payoff = calc_payoff(self._animals)
 		mean_payoff = np.mean(lifetime_payoff)
 
 		if (mean_payoff == 0):
@@ -139,30 +135,35 @@ class Population:
 		else:
 			payoff_factor = lifetime_payoff/mean_payoff
 
-		new_animals = [self._breed(animal,payoff) for animal,payoff in zip(self._animals,payoff_factor)]
-		new_animals = np.array([item for sublist in new_animals for item in sublist])
+		offspring = np.random.poisson(lam=payoff_factor)
+		born_animals = np.repeat(self._animals,offspring)
+		mutate_pop = np.vectorize(lambda x: Animal(x.genes.mutate()))
+		new_animals = mutate_pop(born_animals)
 
 		N = len(new_animals)
 		print("Population size: {0}".format(N))
 		if (N > self._constants["population_size"]):
 			new_animals = np.random.choice(new_animals,self._constants["population_size"],replace=False)
 		elif (N < self._constants["population_size"]):
-			clones = np.random.choice(new_animals,self._constants["population_size"] - N)
-			clones = list(map(deepcopy,clones))
+			copy_clones = np.vectorize(deepcopy)
+			clones = copy_clones(np.random.choice(new_animals,self._constants["population_size"] - N))
 			new_animals = np.append(new_animals,clones)
 
 		self._animals = new_animals
 
 
 	def breed_variable(self):
-		lifetime_payoff = np.zeros(self._size)
-		max_payoff = np.zeros(self._size)
-		for (i,animal) in enumerate(self._animals):
-			lifetime_payoff[i] = self._lifetime_payoff(animal)
-			max_payoff[i] = self._max_payoff(animal)
+		calc_payoff = np.vectorize(self._lifetime_payoff)
+		lifetime_payoff = calc_payoff(self._animals)
+		calc_payoff = np.vectorize(self._max_payoff)
+		max_payoff = calc_payoff(self._animals)
 
-		new_animals = map(self._breed,self._animals,lifetime_payoff/max_payoff)
-		new_animals = [item for sublist in new_animals for item in sublist]
+		payoff_factor = lifetime_payoff/max_payoff
+
+		offspring = np.random.poisson(lam=payoff_factor)
+		born_animals = np.repeat(self._animals,offspring)
+		mutate_pop = np.vectorize(lambda x: x._offspring(x.genes.mutate()))
+		new_animals = mutate_pop(born_animals)
 
 		N = len(new_animals)
 		if (N > self._constants["population_size"]):
@@ -170,8 +171,3 @@ class Population:
 
 		self._animals = new_animals
 		self._size = len(new_animals)
-
-	def _breed(self,animal,payoff_factor):
-		offspring = np.random.poisson(lam=payoff_factor)	
-		new_animals = [Animal(animal.genes.mutate()) for _ in range(offspring)]
-		return new_animals

@@ -37,7 +37,9 @@ def output_population(population,f1,f2,j,k,path,timeseries):
 		plt.savefig(path+'timeseries/pop'+str(k+1)+'_genes_'+str(j)+'.png')
 		plt.close()
 
-def iterate_population(k,population,R,P,A,B,path,timeseries=False):
+	return mean, std
+
+def iterate_population(k,population,R,P,A,B,path,timeseries):
 	t = 0; 
 
 	f1 = open(path+"pop"+str(k+1)+"_mean_genes.csv",'w')
@@ -57,7 +59,7 @@ def iterate_population(k,population,R,P,A,B,path,timeseries=False):
 		# THIS IS WHERE THE MAGIC HAPPENS #
 		###################################
 
-		for i in range(constants["L"]):
+		for _ in range(constants["L"]):
 
 			E, C = environment(t,R,P,A,B)
 			population.react(E,C)
@@ -72,21 +74,31 @@ def iterate_population(k,population,R,P,A,B,path,timeseries=False):
 		end = time.clock()
 		print("Computation time: {0:.3e} s\n".format(end-start))
 
-	# Final outputs
+	# Final outputs for each population
 
-	output_population(population,f1,f2,j,k,path,True)
+	final_mean, final_std = output_population(population,f1,f2,j,k,path,True)
 
-	I0, b, I0p, bp = [], [], [], []
+	I0, b, I0p, bp, h = [], [], [], [], []
 	for animal in population.animals():
 		I0.append(animal.genes['I0'])
 		b.append(animal.genes['b'])
 		I0p.append(animal.genes['I0p'])
 		bp.append(animal.genes['bp'])
+		h.append(animal.genes['h'])
 
-	I0, b = np.array(I0), np.array(b)
 	C = np.linspace(-1,1,200)
 
+	mean_h = np.mean(h)
+	if (mean_h > 1):
+		mean_h = 1
+	elif (mean_h <0):
+		mean_h = 0
+
 	plt.figure()
-	plt.plot(C,np.mean(I0)+np.mean(b)*C)
-	plt.plot(C,np.mean(I0p)+np.mean(bp)*C)
+	plt.plot(C,np.mean(I0)+np.mean(b)*C,alpha=mean_h,label='$I_0$ and $b$')
+	plt.plot(C,np.mean(I0p)+np.mean(bp)*C,alpha=(1-mean_h),label="$I_0'$ and $b'$")
+	plt.legend(loc='best')
+	plt.ylim(-2,2)
 	plt.savefig(path+'pop'+str(k+1)+'_mean.png')
+
+	return final_mean, final_std
