@@ -27,6 +27,10 @@ else:
 
 path = "./output/R{0}-P{1}-A{2}-B{3}_{4}-{5}-{6}_{7}-{8}-{9}/".format(R,P,A,B,year,month,day,hour,minute,sec)
 
+f1 = open(path+"fitness.csv",'w')
+f1.write("R,P,A,B\n{0},{1},{2},{3}\n\n".format(R,P,A,B))
+f1.write("nPop, Mean Payoff, Mean Payoff for each lifetime\n")
+
 # loop over all populations
 for n_pop in range(populations):
     
@@ -46,25 +50,38 @@ for n_pop in range(populations):
     genes = Genome([num[1],num[2],num[3],num[4],num[5],num[6],num[7]])
     
     # create a population of population_size animals that already have the correct mean genes
+    # full population size is chosen to see if DBH is a good strategy
     animal_list = [Animal(genes) for _ in range(constants["population_size"])]
     
-    # create a Population from animal_list
-    population = Population(constants["population_size"],animal_list)
-    
-    # let the Population live for one generation without breeding
-    t = 0
-    E, C = environment(t,R,P,A,B)
-    population.react(E,C,1)
-    t = t+1
-    
-    for _ in range(constants["L"]):
-    
-    	E, C = environment(t,R,P,A,B)
-    	population.react(E,C)
-    	t = t+1
-     
-    # calculate the lifetime payoff (should be the same for all animals)
-    for animal in population.animals():
-        payoff = population._lifetime_payoff(animal)
+    # loop over R to represent a full environmental cycle
+    gen_payoff = []
+    r = int(R)
+    for _ in range(r):
         
-    print(payoff)
+        # create a Population from animal_list
+        population = Population(constants["population_size"],animal_list)
+        
+        # let the Population live for one generation without breeding
+        t = 0
+        E, C = environment(t,R,P,A,B)
+        population.react(E,C,1)
+        t = t+1
+        
+        for _ in range(constants["L"]):
+        
+        	E, C = environment(t,R,P,A,B)
+        	population.react(E,C)
+        	t = t+1
+         
+        payoff = []
+        # calculate the lifetime payoff of each animal
+        for animal in population.animals():
+            payoff.append(population._lifetime_payoff(animal))
+        
+        gen_payoff.append(np.mean(payoff)) 
+        
+    #print(gen_payoff)
+    mean_payoff = np.mean(gen_payoff)
+    print(mean_payoff)
+        
+    f1.write("{0}, {1}, {2}\n".format(n_pop,mean_payoff,gen_payoff))
