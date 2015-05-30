@@ -1,0 +1,111 @@
+
+import numpy as np # For efficient array operations
+import matplotlib.pyplot as plt # For plotting
+import pandas as pd # Easier data handling
+import time # For timing parts of the script, optimizing run time
+
+try: # Seaborn makes prettier plots, but is not installed in a fresh Anaconda python
+    import seaborn as sns 
+    have_seaborn = True
+except ImportError:
+    have_seaborn = False
+
+from popclasses import * # Import custom classes
+from constants import model_constants # Import model constants
+from environment import * # Environment model
+constants = model_constants()
+
+def output_population(population,f1,f2,j,k,path,timeseries,E,C):
+    animals = population.animals()
+    genes = list(map(lambda x: x.genes, animals))
+    data = pd.DataFrame(genes)
+    mean = pd.DataFrame(data.mean()).transpose()
+    std = pd.DataFrame(data.std()).transpose()
+    f1.write(str(j)+","+str(E)+","+str(C)+","); f2.write(str(j)+","+str(E)+","+str(C)+",")
+    mean.to_csv(f1, header=False, index=False)
+    std.to_csv(f2, header=False, index=False)
+
+    if timeseries:
+        plt.figure()
+    
+        if have_seaborn:
+            sns.violinplot(data)
+        else:
+            data.boxplot()
+    
+        plt.ylim(-2,2)
+        plt.savefig(path+'timeseries/pop'+str(k+1)+'_genes_'+str(j)+'.png')
+        plt.close()
+
+    return mean, std
+
+def iterate_population_var(k,population,R,P,A,B,path,timeseries,f1,f2,f3):
+      # start the environment at the point where the previous simulation ended
+    t = constants["L"]*constants["generations"]
+
+    #f1 = open(path+"pop"+str(k+1)+"_mean_genes.csv",'w')
+    f1.write("new environmental conditions\n")
+    f1.write("R,P,A,B\n{0},{1},{2},{3}\nn,E,C,I0,I0p,a,b,bp,h,s\n".format(R,P,A,B))
+
+    #f2 = open(path+"pop"+str(k+1)+"_std_genes.csv",'w')
+    f2.write("new environmental conditions\n")
+    f2.write("R,P,A,B\n{0},{1},{2},{3}\nn,E,C,I0,I0p,a,b,bp,h,s\n".format(R,P,A,B))
+
+    for j in np.arange(1000):
+        # Start timer
+        start = time.clock()
+
+        # output previous population
+        E, C = environment(t,R,P,A,B)
+        output_population(population,f1,f2,j,k,path,timeseries,E,C)
+
+        ###################################
+        # THIS IS WHERE THE MAGIC HAPPENS #
+        ###################################
+
+        for _ in range(constants["L"]):
+
+            E, C = environment(t,R,P,A,B)
+            population.react(E,C)
+            t = t+1
+
+        stop = population.breed_variable(f3,j)
+        if (stop == 1):
+            return [], [], 1
+        #population.breed_constant()
+        population.react(E,C,1)
+
+        # \end{magic}
+
+        print("Pop {2}: Generation {0} of {1} done!".format(j+1,1000,k+1))
+        end = time.clock()
+        print("Computation time: {0:.3e} s\n".format(end-start))
+
+    # Final outputs for each population
+
+    final_mean, final_std = output_population(population,f1,f2,j,k,path,True)
+
+    I0, b, I0p, bp, h = [], [], [], [], []
+    for animal in population.animals():
+        I0.append(animal.genes['I0'])
+        b.append(animal.genes['b'])
+        I0p.append(animal.genes['I0p'])
+        bp.append(animal.genes['bp'])
+        h.append(animal.genes['h'])
+
+    C = np.linspace(-1,1,200)
+
+    mean_h = np.mean(h)
+    if (mean_h > 1):
+        mean_h = 1
+    elif (mean_h <0):
+        mean_h = 0
+
+    plt.figure()
+    plt.plot(C,np.mean(I0)+np.mean(b)*C,alpha=mean_h,label='$I_0$ and $b$')
+    plt.plot(C,np.mean(I0p)+np.mean(bp)*C,alpha=(1-mean_h),label="$I_0'$ and $b'$")
+    plt.legend(loc='best')
+    plt.ylim(-2,2)
+    plt.savefig(path+'pop'+str(k+1)+'_mean.png')
+
+    return final_mean, final_std, 0

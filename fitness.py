@@ -47,7 +47,7 @@ for n_pop in range(populations):
     num = [float(i) for i in lst]
     
     # create genome with the mean genes that shall be tested
-    genes = Genome([num[1],num[2],num[3],num[4],num[5],num[6],num[7]])
+    genes = Genome([num[6],num[7],num[3],num[1],num[2],num[4],num[5]])
     
     # create a population of population_size animals that already have the correct mean genes
     # full population size is chosen to see if DBH is a good strategy
