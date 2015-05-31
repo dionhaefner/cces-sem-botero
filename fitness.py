@@ -6,7 +6,7 @@ import sys
 # Get parameters from command line
 arguments = sys.argv[1:]
 if (len(arguments) !=11 ):
-    print("Usage: main.py [populations] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS]")
+    print("Usage: ftiness.py [populations] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS]")
     print("E.g. $ python fitness.py 100 1 0 1 0 15 05 08 10 44 05")
     sys.exit(0)
 else:
@@ -42,16 +42,50 @@ for n_pop in range(populations):
         for row in reader:
             #print(row)
             lst = row
-    
-    # only use the mean genes of the last generation     
+            
+     # only use the mean genes of the last generation     
     num = [float(i) for i in lst]
+            
+    with open(path+'pop'+n+'_std_genes.csv', newline='') as f:
+        reader = csv.reader(f)
+        for row in reader:
+        #print(row)
+            lst = row
+    num_std = [float(i) for i in lst]
+    num_std = np.fabs(num_std)
+    
     
     # create genome with the mean genes that shall be tested
-    genes = Genome([num[6],num[7],num[3],num[1],num[2],num[4],num[5]])
+    #genes = Genome([num[6],num[7],num[3],num[1],num[2],num[4],num[5]])
+    # create genome with the mean genes that shall be tested
+    genes = []
+    for l in range(constants["population_size"]):
+        h = np.random.normal(loc=num[6],scale=num_std[6])
+        s = np.random.normal(loc=num[7],scale=num_std[7])
+        
+        if (num_std[3] == 0):
+            a = num[3]
+        else:
+            a = np.random.normal(loc=num[3],scale=num_std[3])
+            
+        I0 = np.random.normal(loc=num[1],scale=num_std[1])
+        I0p = np.random.normal(loc=num[2],scale=num_std[2])
+        
+        if (num_std[4] == 0):
+            b = num[4]
+        else:
+            b = np.random.normal(loc=num[4],scale=num_std[4])
+            
+        if (num_std[5] == 0):
+            bp = num[5]
+        else:
+            bp = np.random.normal(loc=num[5],scale=num_std[5])
+        #genes.append(Genome([num[6],num[7],num[3],num[1],num[2],num[4],num[5]]))
+        genes.append(Genome([h,s,a,I0,I0p,b,bp]))
     
     # create a population of population_size animals that already have the correct mean genes
     # full population size is chosen to see if DBH is a good strategy
-    animal_list = [Animal(genes) for _ in range(constants["population_size"])]
+    animal_list = [Animal(genes[x]) for x in range(constants["population_size"])]
     
     # loop over R to represent a full environmental cycle
     gen_payoff = []
@@ -84,4 +118,4 @@ for n_pop in range(populations):
     mean_payoff = np.mean(gen_payoff)
     print(mean_payoff)
         
-    f1.write("{0}, {1}, {2}\n".format(n_pop,mean_payoff,gen_payoff))
+    f1.write("{0}, {1}, {2}\n".format(n_pop+1,mean_payoff,gen_payoff))
