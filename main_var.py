@@ -35,7 +35,7 @@ constants = model_constants()
 # Get parameters from command line
 arguments = sys.argv[1:]
 if (len(arguments) !=14 ):
-    print("Usage: main.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
+    print("Usage: main_var.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
     print("E.g. $ python main_var.py 5 1 0 1 0 15 05 08 10 44 05 10 1")
     sys.exit(0)
 else:
@@ -53,7 +53,7 @@ else:
         populations = int(arguments[13])
             
     except ValueError:
-        print("Usage: main.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
+        print("Usage: main_var.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
         print("E.g. $ python main_var.py 5 1 0 1 0 15 05 08 10 44 05 10 1\n")
         raise
 
