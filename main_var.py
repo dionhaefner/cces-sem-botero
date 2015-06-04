@@ -158,7 +158,7 @@ for k in range(populations):
     n_gen.append(gen)    
     if (stop == 0):
         survival_rate = survival_rate+1
-        f3.write(" survived!")
+        f3.write(" survived!\n")
     end = time.clock()
     print("\n---------------------------------------")
     print(" Population {0} done! Total time: {1:.2f} min".format(k+1,(end-start)/60))

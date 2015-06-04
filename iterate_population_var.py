@@ -84,7 +84,7 @@ def iterate_population_var(k,population,R,nR,P,A,B,path,timeseries,f1,f2,f3):
 
     # Final outputs for each population
 
-    final_mean, final_std = output_population(population,f1,f2,j,k,path,True)
+    final_mean, final_std = output_population(population,f1,f2,j,k,path,True,E,C)
 
     I0, b, I0p, bp, h = [], [], [], [], []
     for animal in population.animals():
