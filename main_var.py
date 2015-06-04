@@ -35,7 +35,7 @@ constants = model_constants()
 # Get parameters from command line
 arguments = sys.argv[1:]
 if (len(arguments) !=14 ):
-    print("Usage: main.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
+    print("Usage: main_var.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
     print("E.g. $ python main_var.py 5 1 0 1 0 15 05 08 10 44 05 10 1")
     sys.exit(0)
 else:
@@ -53,7 +53,7 @@ else:
         populations = int(arguments[13])
             
     except ValueError:
-        print("Usage: main.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
+        print("Usage: main_var.py [population] [R] [P] [A] [B] [year] [month] [day] [HH] [MM] [SS] [nR] [nP] [n]")
         print("E.g. $ python main_var.py 5 1 0 1 0 15 05 08 10 44 05 10 1\n")
         raise
 
@@ -95,10 +95,38 @@ f3.write("initial conditions \n")
 f3.write("R,P,A,B\n{0},{1},{2},{3}\nn,I0,I0p,a,b,bp,h,s\n".format(R,P,A,B))
 f3.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(n_pop,num[1],num[2],num[3],num[4],num[5],num[6],num[7]))
 f3.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(n_pop,num_std[1],num_std[2],num_std[3],num_std[4],num_std[5],num_std[6],num_std[7]))
+f3.write("nR,nP\n{0},{1}\n".format(nR,nP))
 f3.write("mu = {0}".format(constants["mu"]))
 f3.write("\n\n")
 
 survival_rate = 0
+n_gen = []
+
+# create genome with the mean genes that shall be tested
+genes = []
+for l in range(constants["population_size"]):
+    h = np.random.normal(loc=num[6],scale=num_std[6])
+    s = np.random.normal(loc=num[7],scale=num_std[7])
+    
+    if (num_std[3] == 0):
+        a = num[3]
+    else:
+        a = np.random.normal(loc=num[3],scale=num_std[3])
+        
+    I0 = np.random.normal(loc=num[1],scale=num_std[1])
+    I0p = np.random.normal(loc=num[2],scale=num_std[2])
+    
+    if (num_std[4] == 0):
+        b = num[4]
+    else:
+        b = np.random.normal(loc=num[4],scale=num_std[4])
+        
+    if (num_std[5] == 0):
+        bp = num[5]
+    else:
+        bp = np.random.normal(loc=num[5],scale=num_std[5])
+    #genes.append(Genome([num[6],num[7],num[3],num[1],num[2],num[4],num[5]]))
+    genes.append(Genome([h,s,a,I0,I0p,b,bp]))
 
 for k in range(populations):
     # write starting genes in files
@@ -106,39 +134,15 @@ for k in range(populations):
     f1.write("initial conditions \n")
     f1.write("R,P,A,B\n{0},{1},{2},{3}\nn,I0,I0p,a,b,bp,h,s\n".format(R,P,A,B))
     f1.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(n_pop,num[1],num[2],num[3],num[4],num[5],num[6],num[7]))
+    f1.write("nR,nP\n{0},{1}\n".format(nR,nP))
     f1.write("\n\n")
     
     f2 = open(path+"pop"+str(k+1)+"_std_genes.csv",'w')
     f2.write("initial conditions \n")
     f2.write("R,P,A,B\n{0},{1},{2},{3}\nn,I0,I0p,a,b,bp,h,s\n".format(R,P,A,B))
     f2.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(n_pop,num[1],num[2],num[3],num[4],num[5],num[6],num[7]))
+    f2.write("nR,nP\n{0},{1}\n".format(nR,nP))    
     f2.write("\n\n")
-        
-    # create genome with the mean genes that shall be tested
-    genes = []
-    for l in range(constants["population_size"]):
-        h = np.random.normal(loc=num[6],scale=num_std[6])
-        s = np.random.normal(loc=num[7],scale=num_std[7])
-        
-        if (num_std[3] == 0):
-            a = num[3]
-        else:
-            a = np.random.normal(loc=num[3],scale=num_std[3])
-            
-        I0 = np.random.normal(loc=num[1],scale=num_std[1])
-        I0p = np.random.normal(loc=num[2],scale=num_std[2])
-        
-        if (num_std[4] == 0):
-            b = num[4]
-        else:
-            b = np.random.normal(loc=num[4],scale=num_std[4])
-            
-        if (num_std[5] == 0):
-            bp = num[5]
-        else:
-            bp = np.random.normal(loc=num[5],scale=num_std[5])
-        #genes.append(Genome([num[6],num[7],num[3],num[1],num[2],num[4],num[5]]))
-        genes.append(Genome([h,s,a,I0,I0p,b,bp]))
         
     # create a population of population_size animals that already
     # have the correct mean genes
@@ -150,7 +154,8 @@ for k in range(populations):
     start = time.clock()
     
     f3.write("Population {0}".format(k+1))
-    pop_mean, pop_std, stop = iterate_population_var(k,population,nR,nP,A,B,path,0,f1,f2,f3)
+    pop_mean, pop_std, stop, gen = iterate_population_var(k,population,R,nR,nP,A,B,path,0,f1,f2,f3)
+    n_gen.append(gen)    
     if (stop == 0):
         survival_rate = survival_rate+1
         f3.write(" survived!")
@@ -160,3 +165,6 @@ for k in range(populations):
     print("---------------------------------------\n")
 
 f3.write("\n\nIn total {0}/{1} Populations survived.".format(survival_rate,populations))
+mean_gen = np.mean(n_gen)
+std_gen = np.std(n_gen)
+f3.write("\n\nThe average max Generation # was: {0} +- {1}".format(mean_gen,std_gen))

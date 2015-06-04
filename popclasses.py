@@ -184,7 +184,7 @@ class Population:
         print("Mean Lifetime Payoff: {0}".format(mean_lifetime_payoff))
         if (N == 0):
             f3.write(" died out in generation {0}\n".format(j))
-            return 1
+            return 1, j
             
         #if (N > self._constants["population_size"]):
         if (N > 10000):
@@ -193,4 +193,4 @@ class Population:
         self._animals = new_animals
         self._size = len(new_animals)
         
-        return 0
+        return 0, 1000

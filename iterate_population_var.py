@@ -39,9 +39,10 @@ def output_population(population,f1,f2,j,k,path,timeseries,E,C):
 
     return mean, std
 
-def iterate_population_var(k,population,R,P,A,B,path,timeseries,f1,f2,f3):
-      # start the environment at the point where the previous simulation ended
-    t = constants["L"]*constants["generations"]
+def iterate_population_var(k,population,R,nR,P,A,B,path,timeseries,f1,f2,f3):
+    # start the environment at the point where the previous simulation ended
+    # and correct the phase if nR != R
+    t = constants["L"]*constants["generations"]*nR/R
 
     #f1 = open(path+"pop"+str(k+1)+"_mean_genes.csv",'w')
     f1.write("new environmental conditions\n")
@@ -69,9 +70,9 @@ def iterate_population_var(k,population,R,P,A,B,path,timeseries,f1,f2,f3):
             population.react(E,C)
             t = t+1
 
-        stop = population.breed_variable(f3,j)
+        stop,gen = population.breed_variable(f3,j)
         if (stop == 1):
-            return [], [], 1
+            return [], [], 1, gen
         #population.breed_constant()
         population.react(E,C,1)
 
@@ -108,4 +109,4 @@ def iterate_population_var(k,population,R,P,A,B,path,timeseries,f1,f2,f3):
     plt.ylim(-2,2)
     plt.savefig(path+'pop'+str(k+1)+'_mean.png')
 
-    return final_mean, final_std, 0
+    return final_mean, final_std, 0, 1000
