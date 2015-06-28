@@ -1,1 +1,0 @@
-python -m cProfile -s 'time' main.py 1 0
