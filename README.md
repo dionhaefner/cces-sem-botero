@@ -7,9 +7,9 @@ Welcome to the simulation code based on the work of Botero et al., 2015. This is
 
 The implemented model was obtained from Botero et al., 2015:
 
-> Carlos A. Botero, Franz J. Weissing, Jonathan Wright, and Dustin R. Rubenstein
-> *Evolutionary tipping points in the capacity to adapt to environmental change*
-> **PNAS**, 112 (1): 184-189, 2015.
+> Carlos A. Botero, Franz J. Weissing, Jonathan Wright, and Dustin R. Rubenstein  
+> *Evolutionary tipping points in the capacity to adapt to environmental change*  
+> **PNAS**, 112 (1): 184-189, 2015.  
 > http://www.pnas.org/content/112/1/184.full
 
 Minor changes have been applied to the model in order to test its robustness. This code now fully supports multiple parallel environments and migration between them.
