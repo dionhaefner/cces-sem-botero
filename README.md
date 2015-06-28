@@ -14,8 +14,8 @@ Minor changes have been applied to the model in order to test its robustness. Th
 
 ### Installation
 
-You will need to have Python 2.7 or 3.x installed, along with the usual numerical packages like NumPy, Matplotlib and Pandas. A convenient way to get all this is \href{https://store.continuum.io/cshop/anaconda/}{Anaconda Python}, which is available for all major OS, and free of charge. Another highly recommended package that is not included with Anaconda Python is \href{https://www.stanford.edu/~mwaskom/software/seaborn/}{Seaborn}, which provides powerful tools of high-end data visualization. You can get this either from source or run
-	$ pip install seaborn
+You will need to have Python 2.7 or 3.x installed, along with the usual numerical packages like NumPy, Matplotlib and Pandas. A convenient way to get all this is [Anaconda Python](https://store.continuum.io/cshop/anaconda/), which is available for all major OS, and free of charge. Another highly recommended package that is not included with Anaconda Python is [Seaborn](https://www.stanford.edu/~mwaskom/software/seaborn/), which provides powerful tools of high-end data visualization. You can get this either from source or run
+>	$ pip install seaborn
 from your favorite Unix-style command line.
 
 
@@ -36,6 +36,7 @@ dionhaefner@web.de
 The project is licensed under the BSD 2-Clause License:
 
 Copyright (c) 2015, Dion Häfner
+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
