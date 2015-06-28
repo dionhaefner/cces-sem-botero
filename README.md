@@ -7,7 +7,10 @@ Welcome to the simulation code based on the work of Botero et al., 2015. This is
 
 The implemented model was obtained from Botero et al., 2015:
 
-http://www.pnas.org/content/112/1/184.full
+>    Carlos A. Botero, Franz J. Weissing, Jonathan Wright, and Dustin R. Rubenstein
+>    *Evolutionary tipping points in the capacity to adapt to environmental change*
+>    **PNAS**, 112 (1): 184-189, 2015.
+>	http://www.pnas.org/content/112/1/184.full
 
 Minor changes have been applied to the model in order to test its robustness. This code now fully supports multiple parallel environments and migration between them.
 
@@ -15,7 +18,9 @@ Minor changes have been applied to the model in order to test its robustness. Th
 ### Installation
 
 You will need to have Python 2.7 or 3.x installed, along with the usual numerical packages like NumPy, Matplotlib and Pandas. A convenient way to get all this is [Anaconda Python](https://store.continuum.io/cshop/anaconda/), which is available for all major OS, and free of charge. Another highly recommended package that is not included with Anaconda Python is [Seaborn](https://www.stanford.edu/~mwaskom/software/seaborn/), which provides powerful tools of high-end data visualization. You can get this either from source or run
+
 >	$ pip install seaborn
+
 from your favorite Unix-style command line.
 
 
