@@ -31,7 +31,7 @@ from your favorite Unix-style command line.
 
 ### Usage
 
-Just clone the repository and execute botero.py in the main folder! You can also call `main_constant.py` and `main_variable.py` from command line, e.g. if you want to include these into a shell script that runs simulations autonomously. The model parameters can be changed in the file `constants.py`.
+Just clone the repository and execute `botero.py` in the main folder! You can also call `main_constant.py` and `main_variable.py` from command line, e.g. if you want to include these into a shell script that runs simulations autonomously. The model parameters can be changed in the file `constants.py`.
 
 Examples for the usage of the custom classes are found in the file `example.py`.
 
