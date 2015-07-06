@@ -12,12 +12,17 @@ The implemented model was obtained from Botero et al., 2015:
 > **PNAS**, 112 (1): 184-189, 2015.  
 > http://www.pnas.org/content/112/1/184.full
 
-Minor changes have been applied to the model in order to test its robustness. This code now fully supports multiple parallel environments and migration between them.
+Minor changes have been applied to the model in order to test its robustness. This code now fully supports multiple parallel environments and migration between them. To be precise, the following adjustments have been made to the model suggested by Botero et al.:
+
+* Introduced support for multiple parallel environments between which migration takes place
+* Additional environmental parameter `O` (constant offset)
+* A scale function that diminishes the effect of genes on insulation for extreme values (currently logarithmical)
+* New genes dubbed `m` and `ma` encoding the probability to (reversibly) migrate to another random environment
 
 
 ### Installation
 
-You will need to have Python 2.7 or 3.x installed, along with the usual numerical packages like NumPy, Matplotlib and Pandas. A convenient way to get all this is [Anaconda Python](https://store.continuum.io/cshop/anaconda/), which is available for all major OS, and free of charge. Another highly recommended package that is not included with Anaconda Python is [Seaborn](https://www.stanford.edu/~mwaskom/software/seaborn/), which provides powerful tools of high-end data visualization. You can get this either from source or run
+You will need to have Python 2.7 or 3.x installed, along with the usual numerical packages like `NumPy`, `Matplotlib` and `Pandas`. A convenient way to get all this is [Anaconda Python](https://store.continuum.io/cshop/anaconda/), which is available for all major OS, and free of charge. Another highly recommended package that is not included with Anaconda Python is [Seaborn](https://www.stanford.edu/~mwaskom/software/seaborn/), which provides powerful tools of high-end data visualization. You can get this either from source or run
 
 >	$ pip install seaborn
 
@@ -26,16 +31,16 @@ from your favorite Unix-style command line.
 
 ### Usage
 
-Just clone the repository and execute botero.py in the main folder! You can also call main_constant.py and main_variable.py from command line, e.g. if you want to include these into a shell script that runs simulations autonomously. The model parameters can be changed in the file constants.py.
+Just clone the repository and execute botero.py in the main folder! You can also call `main_constant.py` and `main_variable.py` from command line, e.g. if you want to include these into a shell script that runs simulations autonomously. The model parameters can be changed in the file `constants.py`.
 
-Examples for the usage of the custom classes are found in the file example.py.
+Examples for the usage of the custom classes are found in the file `example.py`.
 
 
 ### Contact
 
 Should you run into problems, do not hesitate to contact the author via e-mail:
 
-dionhaefner@web.de
+mail@dionhaefner.de
 
 
 ### Legal
