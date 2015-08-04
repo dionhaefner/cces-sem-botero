@@ -44,10 +44,9 @@ from iterate_population import iterate_population
 
 
 
-def main(populations, R, timeseries):
-
+if __name__ == '__main__':
 	# Get model constants
-	constants = model_constants()
+	constants = model_constants
 
 	if have_seaborn: # initialize seaborn
 		sns.set('poster')
@@ -69,7 +68,7 @@ def main(populations, R, timeseries):
 
 	environments = []
 	for (i,param) in enumerate(constants["environments"]):
-		new_env = Environment(R,*param)
+		new_env = Environment(*param)
 		environments.append(new_env)
 		env_val = np.array(list(map(new_env.evaluate,t0)))
 
@@ -83,7 +82,7 @@ def main(populations, R, timeseries):
 
 	means, stds = [], []
 	error_occured = False
-	for k in range(populations):
+	for k in range(constants["populations"]):
 		start = time.clock()
 
 		repeat = True
@@ -98,6 +97,7 @@ def main(populations, R, timeseries):
 			print("Set-up time: {0:.2e}s\n".format(end-start))
 			start = time.clock()
 
+			# initial output
 			f1 = open(path+"pop"+str(k+1)+"_mean_genes.csv",'w')
 			f2 = open(path+"pop"+str(k+1)+"_std_genes.csv",'w')
 
@@ -113,7 +113,7 @@ def main(populations, R, timeseries):
 					
 			# iterate on the population and create outputs
 			try:
-				pop_mean, pop_std, _ = iterate_population(k,population,environments,f1,f2,path,timeseries)
+				pop_mean, pop_std, _ = iterate_population(k,constants,environments,f1,f2,path)
 				repeat = False
 			except RuntimeError:
 				error_occured = True
@@ -144,20 +144,3 @@ def main(populations, R, timeseries):
 
 	if error_occured:
 		warnings.warn("At least one population died out and was repeated!")
-
-
-if __name__ == '__main__':
-	# Get parameters from command line
-	arguments = sys.argv[1:]
-	if (len(arguments) != 3):
-		print("Usage: main_constant.py [populations] [R] [output timeseries]")
-		print("E.g. $ python main_constant.py 100 1E4 1")
-		sys.exit(0)
-	else:
-		try:
-			populations, R, timeseries = int(arguments[0]), float(arguments[1]), arguments[2].lower() in ("true", "t", "1")
-		except ValueError:
-			print("Usage: main_constant.py [populations] [R] [output timeseries]")
-			print("E.g. $ python main_constant.py 100 1E4 1\n")
-			raise
-	main(populations, R, timeseries)
