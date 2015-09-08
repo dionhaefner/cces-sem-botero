@@ -22,7 +22,6 @@ except ImportError:
 	have_seaborn = False
 
 # Import other parts of the project
-from genome import Genome 
 from animal import Animal
 from population import Population
 from environment import Environment
@@ -30,7 +29,7 @@ from constants import model_constants
 from output_population import output_population, plot_size
 
 
-def iterate_population(k,population,environments,f1,f2,path,timeseries,t=0,variable=False):
+def iterate_population(k,population,environments,f1,f2,path,t=0,variable=False):
 # MAIN CONTROLLER
 # Inputs:
 #	k: population counter,	population: the Population instance to be iterated,
@@ -38,7 +37,8 @@ def iterate_population(k,population,environments,f1,f2,path,timeseries,t=0,varia
 #	path: path to the output files,	timeseries: output plotting in every timestep,
 #	t: initial time,	variable: variable population size
 
-	constants = model_constants()
+	constants = model_constants
+	timeseries = constants["timeseries"]
 	nE = len(environments)
 
 	for j in np.arange(constants["generations"]):

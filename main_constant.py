@@ -35,7 +35,6 @@ except ImportError:
 # Import other parts of the project
 #
 
-from genome import Genome 
 from animal import Animal
 from population import Population
 from environment import Environment
@@ -55,13 +54,18 @@ if __name__ == '__main__':
 
 	# create output directory
 	now = datetime.datetime.today()
-	path = "./output/R{1}-{0:%y}-{0:%m}-{0:%d}_{0:%H}-{0:%M}-{0:%S}/".format(now,R)
+	path = "./output/{0:%y}-{0:%m}-{0:%d}_{0:%H}-{0:%M}-{0:%S}/".format(now)
 	try: 
 		os.makedirs(path)
 		os.makedirs(path+"timeseries/")
 	except OSError:
 		if not os.path.isdir(path):
 			raise
+
+	# write simulation parameters
+	f = open(path+"parameters.txt","w")
+	for key in constants:
+		f.write("{0}:\t{1}".format(key,constants[key]))
 
 	# plot environments
 	t0 = np.arange(0,constants["L"]*constants["generations"])
@@ -89,7 +93,6 @@ if __name__ == '__main__':
 		while repeat:
 			# create a population of population_size animals that already have the correct random genes
 			animal_list = [Animal() for _ in range(constants["population_size"])]
-
 			# create a Population from animal_list
 			population = Population(constants["population_size"],animal_list)
 
@@ -113,7 +116,7 @@ if __name__ == '__main__':
 					
 			# iterate on the population and create outputs
 			try:
-				pop_mean, pop_std, _ = iterate_population(k,constants,environments,f1,f2,path)
+				pop_mean, pop_std, _ = iterate_population(k,population,environments,f1,f2,path)
 				repeat = False
 			except RuntimeError:
 				error_occured = True

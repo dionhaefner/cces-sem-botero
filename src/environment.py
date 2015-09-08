@@ -24,7 +24,7 @@ class Environment:
 			self.B = B
 			self.O = O
 			self.name = name
-			self._constants = model_constants()
+			self._constants = model_constants
 		else:
 			raise TypeError('First five arguments must be numeric.')
 

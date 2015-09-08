@@ -23,7 +23,6 @@ except ImportError:
 	have_seaborn = False
 
 # Import other parts of the project
-from genome import Genome 
 from animal import Animal
 from population import Population
 from environment import Environment
@@ -37,12 +36,12 @@ def output_population(population,f1,f2,j,k,path,timeseries,t,env):
 # j: current generation counter, k: current population counter,
 # path: output path, timeseries: whether complex output should be saved,
 # t: current time step, env: list of environments
-	constants = model_constants()
+	constants = model_constants
 	animals 	= np.array(population.animals())
 	positions	= np.array(list(map(lambda x: x.position, animals)))
 
 	nE 		= len(constants["environments"])
-	genes 	= [list(map(lambda x: x.genes, animals[positions==i])) for i in range(nE)]
+	genes 	= [list(map(lambda x: x.gene_dict, animals[positions==i])) for i in range(nE)]
 	nPerPos	= np.array([len(genes[i]) for i in range(nE)])
 	data 	= [pd.DataFrame(genes[i]) for i in range(nE)]
 	mean 	= [pd.DataFrame(data[i].mean()).transpose() for i in range(nE)]
@@ -117,7 +116,7 @@ def output_population(population,f1,f2,j,k,path,timeseries,t,env):
 
 
 def plot_size(path,fi,k):
-	constants = model_constants()
+	constants = model_constants
 	nE = 0
 	f = open(fi)
 	for (i,row) in enumerate(f):
