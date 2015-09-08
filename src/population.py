@@ -49,7 +49,7 @@ class Population:
 		calc_payoff 	= np.vectorize(lambda x: x.lifetime_payoff(self._positions))
 		lifetime_payoff = calc_payoff(self._animals)
 		mean_payoff 	= np.mean(lifetime_payoff)
-		print("Animals per environment: {0}".format(self._positions))
+
 		if (mean_payoff == 0):
 			raise RuntimeError("Mean payoff of population decreased to 0. Check your parameters!")
 		else:
@@ -61,7 +61,9 @@ class Population:
 		new_animals = mutate_pop(born_animals)
 
 		N = len(new_animals)
-		print("Population size: {0}\tMean payoff: {1:.2f}".format(N,mean_payoff))
+		if self._constants["verbose"]:
+			print("Animals per environment: {0}".format(self._positions))
+			print("Population size: {0}\tMean payoff: {1:.2f}".format(N,mean_payoff))
 		if (N > self._constants["population_size"]):
 			new_animals = np.random.choice(new_animals,self._constants["population_size"],replace=False)
 		elif (N < self._constants["population_size"]):
@@ -94,7 +96,9 @@ class Population:
 		new_animals = mutate_pop(born_animals)
 
 		N = len(new_animals)
-		print("Population size: {0}".format(N))
+		if self._constants["verbose"]:
+			print("Animals per environment: {0}".format(self._positions))
+			print("Population size: {0}".format(N))
 		if (N > self._constants["population_size"]):
 			new_animals = np.random.choice(new_animals,self._constants["population_size"],replace=False)
 

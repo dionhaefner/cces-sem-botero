@@ -97,7 +97,8 @@ if __name__ == '__main__':
 			population = Population(constants["population_size"],animal_list)
 
 			end = time.clock()
-			print("Set-up time: {0:.2e}s\n".format(end-start))
+			if constants["verbose"]:
+				print("Set-up time: {0:.2e}s\n".format(end-start))
 			start = time.clock()
 
 			# initial output
@@ -124,9 +125,12 @@ if __name__ == '__main__':
 
 
 		end = time.clock()
-		print("\n---------------------------------------")
-		print(" Population {0} done! Total time: {1:.2f} min".format(k+1,(end-start)/60))
-		print("---------------------------------------\n")
+		if constants["verbose"]:
+			print("\n---------------------------------------")
+			print(" Population {0} done! Total time: {1:.2f} min".format(k+1,(end-start)/60))
+			print("---------------------------------------\n")
+		else:
+			print("\n\tDone! Total time: {0:.2f} min\n".format((end-start)/60))
 
 		plt.close('all')
 

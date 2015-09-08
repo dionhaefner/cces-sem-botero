@@ -36,7 +36,6 @@ except ImportError:
 # Import other parts of the project
 #
 
-from genome import Genome 
 from animal import Animal
 from population import Population
 from environment import Environment
@@ -45,14 +44,16 @@ from iterate_population import iterate_population
 
 
 
-def main(f_mean,f_std,nR,nP,populations,timeseries):
-
+if __name__ == '__main__':
 	# Get model constants
-	constants = model_constants()
+	constants = model_constants
+
+	f_mean = constants["mean_file"]
+	f_std = constants["std_file"]
 
 	# create output directory
 	now = datetime.datetime.today()
-	path = "./output_var/{3}/R{0}-P{1}_{2:%y}-{2:%m}-{2:%d}_{2:%H}-{2:%M}-{2:%S}/".format(nR,nP,now,f_mean)
+	path = "./output_variable/{0}/{1:%y}-{1:%m}-{1:%d}_{1:%H}-{1:%M}-{1:%S}/".format(f_mean,now)
 	try: 
 		os.makedirs(path)
 		os.makedirs(path+"timeseries/")
@@ -78,7 +79,7 @@ def main(f_mean,f_std,nR,nP,populations,timeseries):
 					env.append(list(map(float,row)))
 	mean_genes = data[-nE:,1:-1]
 	sizes = data[-nE:,-1].reshape(nE)
-	final_t = data[-1,0]*constants["L"]*env[0][0]/nR
+	final_t = data[-1,0]*constants["L"]*env[0][0]/constants["environments"][0][0]
 
 	data = np.genfromtxt(f_std,skiprows=i+1,delimiter=",")
 	std_genes = data[-nE:,1:-1]
@@ -86,12 +87,9 @@ def main(f_mean,f_std,nR,nP,populations,timeseries):
 
 	# create environments
 	environments = []
-	for i in range(nE):
-		new_env = Environment(*env[i])
-		new_env.R = nR
-		new_env.P += nP
+	for param in env:
+		new_env = Environment(*param)
 		environments.append(new_env)
-
 
 	f3 = open(path+"__overview.txt",'w')
 	f3.write("initial conditions \n")
@@ -105,11 +103,12 @@ def main(f_mean,f_std,nR,nP,populations,timeseries):
 
 
 	end = time.clock()
-	print("Set-up time: {0:.2f} min\n".format((end-start)/60))
+	if constants["verbose"]:
+		print("Set-up time: {0:.2e}s\n".format(end-start))
 	start = time.clock()
 
 	survival_rate = 0
-	for k in range(populations):
+	for k in range(constants["populations"]):
 		# write starting genes in files
 
 		f1 = open(path+"pop"+str(k+1)+"_mean_genes.csv",'w')
@@ -132,7 +131,7 @@ def main(f_mean,f_std,nR,nP,populations,timeseries):
 					genes.append(np.random.normal(size=sizes[i],loc=mean_genes[i,j],scale=std_genes[i,j]))
 				else:
 					genes.append(mean_genes[i,j]*np.ones(sizes[i]))
-			animals.append([Animal(Genome(genes),i) for genes in zip(*genes)])
+			animals.append([Animal(np.array(genes),i) for genes in zip(*genes)])
 		animals = [item for sublist in animals for item in sublist]
 			
 		# create a population of population_size animals that have the correct mean genes
@@ -140,38 +139,23 @@ def main(f_mean,f_std,nR,nP,populations,timeseries):
 		
 		
 		f3.write("Population {0}".format(k+1))
-		pop_mean, pop_std, final_gen = iterate_population(k,population,environments,f1,f2,path,timeseries,final_t,True)
+		pop_mean, pop_std, final_gen = iterate_population(k,population,environments,f1,f2,path,final_t,True)
+		end = time.clock()
+
+
 		if pop_mean is None:
+			if not constants["verbose"]:
+				print("\n\tDied out! Total time: {0:.2f} min\n".format((end-start)/60)) 
 			f3.write(" died at generation {0}!\n".format(final_gen))
 		else:
+			if not constants["verbose"]:
+				print("\n\tSurvived! Total time: {0:.2f} min\n".format((end-start)/60)) 
 			survival_rate = survival_rate+1
 			f3.write(" survived!\n")
-		end = time.clock()
-		print("\n---------------------------------------")
-		print(" Population {0} done! Total time: {1:.2f} min".format(k+1,(end-start)/60))
-		print("---------------------------------------\n")
 
-	f3.write("\n\nIn total, {0}/{1} Populations survived.".format(survival_rate,populations))
+		if constants["verbose"]:
+			print("\n---------------------------------------")
+			print(" Population {0} done! Total time: {1:.2f} min".format(k+1,(end-start)/60))
+			print("---------------------------------------\n")
 
-
-
-if __name__ == '__main__':
-	# Get parameters from command line
-	arguments = sys.argv[1:]
-	if (len(arguments) !=6):
-		print("Usage: main_variable.py [mean file] [std file] [nR] [nP] [n] [timeseries]")
-		print("E.g. $ python main_variable.py mean.csv std.csv 1.1E4 0.5 10 False")
-		sys.exit(0)
-	else:
-		try:
-			f_mean, f_std = arguments[0:2]
-			nR = float(arguments[2])
-			nP = float(arguments[3])
-			populations = int(arguments[4])
-			timeseries = arguments[5].lower() in ("true", "t", "1")
-				
-		except ValueError:
-			print("Usage: main_variable.py [mean file] [std file] [nR] [nP] [n] [timeseries]")
-			print("E.g. $ python main_variable.py mean.csv std.csv 1.1E4 0.5 10 False\n")
-			raise
-	main(f_mean,f_std,nR,nP,populations,timeseries)
+	f3.write("\n\nIn total, {0}/{1} Populations survived.".format(survival_rate,constants["populations"]))
