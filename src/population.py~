@@ -1,15 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
-
 #########################################################
-#
-#	population.py
+#	output_population.py
 #	Author: Dion Häfner (dionhaefner@web.de)
 #	
 #	Implements Population class
 #	
 #	Licensed under BSD 2-Clause License
-#
 #########################################################
 
 
@@ -74,6 +69,7 @@ class Population:
 		elif (N < self._constants["population_size"]):
 			clone_candidates = np.random.choice(new_animals,self._constants["population_size"] - N)
 			clones = [Animal(x.genes,x.position) for x in clone_candidates]
+			print(clones)
 			new_animals = np.append(new_animals,clones)
 
 		self._animals 	= new_animals

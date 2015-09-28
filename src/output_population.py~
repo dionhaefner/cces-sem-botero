@@ -1,15 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
-
 #########################################################
-#
 #   output_population.py
 #   Author: Dion Häfner (dionhaefner@web.de)
 #   
 #   Responsible for output and plotting
 #   
 #   Licensed under BSD 2-Clause License
-#
 #########################################################
 
 
@@ -111,7 +106,7 @@ def plot_situation(t,data,nPerPos,env,filename):
             if have_seaborn:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
-                    sns.violinplot(data=data[i],ax=ax,scale='width')
+                    sns.violinplot(x=names,data=data[i],ax=ax,scale='width')
             else:
                 data[i].boxplot(ax=ax)
         

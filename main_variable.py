@@ -1,12 +1,18 @@
 #!/usr/bin/env python
+# -*- coding: utf8 -*-
 
 #########################################################
+#
 #	main_variable.py
 #	Author: Dion Häfner (dionhaefner@web.de)
 #	
 #	Main controller, with variable population size
-#	
+#
+#	Usage:
+#		python main_variable.py [options]
+#
 #	Licensed under BSD 2-Clause License
+#
 #########################################################
 
 import sys
@@ -85,7 +91,7 @@ if __name__ == '__main__':
 	std_genes = data[-nE:,1:-1]
 	std_genes = np.fabs(std_genes)
 
-	# create environments
+	# create environments and output information about them
 	environments = []
 	for param in env:
 		new_env = Environment(*param)
@@ -107,6 +113,7 @@ if __name__ == '__main__':
 		print("Set-up time: {0:.2e}s\n".format(end-start))
 	start = time.clock()
 
+	# main loop over multiple populations
 	survival_rate = 0
 	for k in range(constants["populations"]):
 		# write starting genes in files
@@ -125,6 +132,7 @@ if __name__ == '__main__':
 			if sizes[i] == 0:
 				continue
 			genes = []
+			# unfortunately, the genes are written in a different order as it is used here
 			gene_order = [6,9,3,1,2,4,5,7,8]
 			for j in gene_order:
 				if (std_genes[i,j] > 0):
@@ -132,7 +140,7 @@ if __name__ == '__main__':
 				else:
 					genes.append(mean_genes[i,j]*np.ones(sizes[i]))
 			animals.append([Animal(np.array(genes),i) for genes in zip(*genes)])
-		animals = [item for sublist in animals for item in sublist]
+		animals = [item for sublist in animals for item in sublist] # flatten animal list
 			
 		# create a population of population_size animals that have the correct mean genes
 		population = Population(constants["population_size"],animals)

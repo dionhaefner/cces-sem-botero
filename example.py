@@ -1,12 +1,15 @@
 #!/usr/bin/env python
+# -*- coding: utf8 -*-
 
 #########################################################
+#
 #	example.py
 #	Author: Dion Häfner (dionhaefner@web.de)
 #	
 #	Demonstrates the usage of custom classes
-#	
+#
 #	Licensed under BSD 2-Clause License
+#
 #########################################################
 
 import sys
@@ -29,7 +32,6 @@ except ImportError:
 # Import other parts of the project
 #
 
-from genome import Genome 
 from animal import Animal
 from population import Population
 from environment import Environment
@@ -42,7 +44,7 @@ from iterate_population import iterate_population
 #
 
 # Create an Animal and operate on it
-genes = Genome([1.512,2,3,4,5,6,7,8,9])
+genes = np.array([1.512,2,3,4,5,6,7,8,9])
 duck = Animal(genes,0)
 
 print(duck.genes)
@@ -51,14 +53,15 @@ print(duck.mismatch)
 
 # To create an Animal with randomly drawn genes, just omit the argument:
 random_duck = Animal()
-print(random_duck.genes) 
+print(random_duck.gene_dict)
+print(random_duck.genes)
 
 # These raise an error:
 # wrong_duck = Animal([1,2,3,4,5,6,7,8,9]) - argument must be a 'Genome'
 # wrong_genes = Genome([1,2,3,4,5,6]) - argument is too short
 
 # Mutate an Animal's genes
-print(random_duck.genes.mutate())
+print(random_duck.mutate())
 
 
 # Create an Environment

@@ -1,25 +1,16 @@
-# -*- coding: utf8 -*-
-
 #########################################################
-#
 #	animal.pyx
 #	Author: Dion Häfner (dionhaefner@web.de)
 #	
-#	Implements animal class and methods
+#	Implementing Animal class and methods
 #	(cythonized version of animal.py and genome.py)
-#	
-#	YOU WILL NEED TO RUN setup.py AFTER MAKING CHANGES HERE
 #
 #	Licensed under BSD 2-Clause License
-#
 #########################################################
 
 
 import numpy as np
 
-from constants import model_constants
-
-# imports from c libraries for speed
 cimport numpy as np
 from libc.math cimport abs as c_abs
 from libc.math cimport log as c_log
@@ -29,34 +20,33 @@ from libc.stdlib cimport RAND_MAX
 from libc.math cimport fmax as c_max
 from libc.math cimport fmin as c_min
 
-# custom type definitions
 DTYPE = np.int
 BTYPE = np.uint8
 ctypedef np.int_t DTYPE_t
 ctypedef np.uint8_t BTYPE_t
 
+from constants import model_constants
+
 cdef int nE = len(model_constants["environments"])
 
-
-# implements a cython class Animal, that is also available outside of this module
 cdef class Animal:
-	# properties of Animal, typed as C variables for speed
 	cdef object _constants
 	cdef double h,s,a,I0,I0p,b,bp,m,ma
 	cdef double mismatch
 	cdef int adjustments
 	cdef int migrations
 	cdef double insulation
-	# public keyword makes the variable accessible to python
 	cdef public int position
 
 	def __init__(self,np.ndarray[double,ndim=1] parent_genes=np.array([]),int position=nE+1):
+	# Takes a Genome as input and outputs an Animal with traits genes,
+	# mismatch, adjustments and insulation.
 		self._constants = model_constants
-		if not parent_genes.size: # empty argument -> random genes (default)
+		if not parent_genes.size:
 			self.genes = random_genes()
 		else:
 			self.genes = parent_genes
-		if position > nE: # too large argument -> random position (default)
+		if position > nE:
 			position = np.random.randint(nE)
 		self.mismatch = 0
 		self.adjustments = 0
@@ -135,7 +125,7 @@ cdef class Animal:
 		return new_genes
 
 
-	# allows the genes of the animal to be read and written from python by calling animal.gene_dict or animal.genes
+
 	property gene_dict:
 		def __get__(self):
 			return {"h":self.h,"s":self.s,"a":self.a,"I0":self.I0,"I0p":self.I0p,"b":self.b,"bp":self.bp,"m":self.m,"ma":self.ma}
@@ -147,10 +137,7 @@ cdef class Animal:
 		def __set__(self, object genes):
 			self.set_genes(genes)
 
-	cdef set_genes(self,np.ndarray[double,ndim=1] genes):
-	# Checks every single gene if it is being limited or not. This may look messy, but is much faster than
-	# any loop implementation.
-
+	cdef set_genes(self,object genes):
 		if not ("h" in self._constants["limit"]):
 			self.h = genes[0]
 		else:
@@ -196,7 +183,6 @@ cdef class Animal:
 		else:
 			self.ma = c_max(0,c_min(1,genes[8]))
 
-
 # PROTECTED FUNCTIONS
 
 cdef inline double scale(double x):
@@ -219,5 +205,4 @@ cdef inline np.ndarray[double,ndim=1] random_genes():
 	return rand_genes
 
 cdef inline double randnum():
-# Yields random numbers at C speed
 	return c_rand() / float(RAND_MAX)

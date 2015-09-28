@@ -1,12 +1,18 @@
 #!/usr/bin/env python
+# -*- coding: utf8 -*-
 
 #########################################################
+#
 #	main_constant.py
 #	Author: Dion Häfner (dionhaefner@web.de)
 #	
 #	Main controller, with constant population size
-#	
+#
+#	Usage:
+#		python main_constant.py [options]
+#
 #	Licensed under BSD 2-Clause License
+#
 #########################################################
 
 import sys
@@ -65,7 +71,7 @@ if __name__ == '__main__':
 	# write simulation parameters
 	f = open(path+"parameters.txt","w")
 	for key in constants:
-		f.write("{0}:\t{1}".format(key,constants[key]))
+		f.write("{0}:\t{1}\n".format(key,constants[key]))
 
 	# plot environments
 	t0 = np.arange(0,constants["L"]*constants["generations"])
@@ -82,13 +88,15 @@ if __name__ == '__main__':
 		plt.legend()
 		plt.ylim(-2,2)
 		plt.savefig(path+'environment_'+str(i+1)+'.png',bbox_inches='tight')
-	nE = len(environments)
 
+	# main loop over multiple populations
+	nE = len(environments)
 	means, stds = [], []
 	error_occured = False
 	for k in range(constants["populations"]):
 		start = time.clock()
 
+		# in case a population dies out, it is repeated
 		repeat = True
 		while repeat:
 			# create a population of population_size animals that already have the correct random genes
@@ -137,12 +145,13 @@ if __name__ == '__main__':
 		means.append(pop_mean)
 		stds.append(pop_std)
 
+	# plot average genes of ALL populations run
 	for i in range(len(constants["environments"])):
 		mean_i = [mean[i] for mean in means]
 		plt.figure()
 		average = pd.concat(mean_i)
 		if have_seaborn:
-			sns.violinplot(average)
+			sns.violinplot(data=average,scale='width')
 		else:
 			average.boxplot()
 		plt.ylim(-2,2)
