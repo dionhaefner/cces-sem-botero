@@ -18,22 +18,41 @@ Minor changes have been applied to the model in order to test its robustness. Th
 * Additional environmental parameter `O` (constant offset)
 * A scale function that diminishes the effect of genes on insulation for extreme values (currently logarithmical)
 * New genes dubbed `m` and `ma` encoding the probability to (reversibly) migrate to another random environment
+* Possibility to limit certain genes to a range of values
 
 
 ### Installation
 
-You will need to have Python 2.7 or 3.x installed, along with the usual numerical packages like `NumPy`, `Matplotlib` and `Pandas`. A convenient way to get all this is [Anaconda Python](https://store.continuum.io/cshop/anaconda/), which is available for all major OS, and free of charge. Another highly recommended package that is not included with Anaconda Python is [Seaborn](https://www.stanford.edu/~mwaskom/software/seaborn/), which provides powerful tools of high-end data visualization. You can get this either from source or run
+You will need to have Python 2.7 or 3.x installed, along with the usual numerical packages like `NumPy`, `Matplotlib` and `Pandas`. Additionally, parts of the project are written in Cython, so you will need to have this library installed as well. A convenient way to get all this is [Anaconda Python](https://store.continuum.io/cshop/anaconda/), which is available for all major OS, and free of charge. Another highly recommended package that is not included with Anaconda Python is [Seaborn](https://www.stanford.edu/~mwaskom/software/seaborn/), which provides powerful tools of high-end data visualization. You can get this either from source or run
 
 >	$ pip install seaborn
 
-from your favorite Unix-style command line.
+from your favorite Unix-style command line. Without Seaborn, all graphical output will be much less pretty, and violin plots are replaced by simple box plots.
+
+If you cannot or do not want to install Anaconda Python, but have Python >= 2.7 and the package manager pip installed, you may run (with `sudo` as needed)
+
+>	$ pip install -r requirements
+
+in the main folder of this project. This should automatically install all the necessary requirements.
+
+After you have installed the prerequisites, you will probably have to compile the Cython parts of the module once. To do this, execute
+
+>	$ python setup.py build_ext --inplace
+
+If none of the commands threw any errors you are ready to start simulating!
 
 
 ### Usage
 
-Just clone the repository and execute `botero.py` in the main folder! You can also call `main_constant.py` and `main_variable.py` from command line, e.g. if you want to include these into a shell script that runs simulations autonomously. The model parameters can be changed in the file `constants.py`.
+The goal with this package was to create a software that is both easy to use and easy to modify. The simplest work flow for running simulations with this code would be:
 
-Examples for the usage of the custom classes are found in the file `example.py`.
+1. Customize the model parameters in the file `constants.py`, as defined in the array `_PARAMETERS` (or just keep the default values).
+2. Call `python main_constant.py` (simulation with constant population size), and grab a cup of coffee.
+3. The output will be found in a new folder `output` and will contain the mean genes of the populations and their standard deviation in every time step, and a detailed plot every few time steps (may be specified in the `constants.py`).
+
+For runs with variable population size, you also need to specify two `.csv`-files, containing the mean genes of the starting population and their standard deviation (output of a run with constant population size). You have to pass the name of these files via the command line.
+
+For more usage examples consult the docs!
 
 
 ### Contact
