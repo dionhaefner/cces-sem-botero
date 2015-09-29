@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+"""
 #########################################################
 #
 #	setup.py
@@ -15,7 +15,7 @@
 #	Licensed under BSD 2-Clause License
 #
 #########################################################
-
+"""
 
 from distutils.core import setup
 from Cython.Build import cythonize

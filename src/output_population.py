@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+"""
 #########################################################
 #
 #   output_population.py
@@ -11,13 +11,12 @@
 #   Licensed under BSD 2-Clause License
 #
 #########################################################
-
+"""
 
 # Import third-party libraries
 import numpy as np 
 import matplotlib.pyplot as plt 
 import pandas as pd
-from copy import copy
 import warnings
 
 # Seaborn makes prettier plots, but is not installed in a fresh Anaconda python
@@ -35,12 +34,14 @@ from constants import model_constants
 
 
 def output_population(population,f1,f2,j,k,path,force_plot,t,env):
-# Outputs state of the Population. Inputs:
-# population: instance of Population to be output, 
-# f1: file handle for mean gene file, f2: file handle for standard dev. of genes
-# j: current generation counter, k: current population counter,
-# path: output path, timeseries: whether complex output should be saved,
-# t: current time step, env: list of environments
+    """
+    Outputs state of the Population. Inputs:
+        population: instance of Population to be output, 
+        f1: file handle for mean gene file, f2: file handle for standard dev. of genes
+        j: current generation counter, k: current population counter,
+        path: output path, timeseries: whether complex output should be saved,
+        t: current time step, env: list of environments
+    """
     constants = model_constants
     animals = np.array(population.animals())
     positions = np.array(list(map(lambda x: x.position, animals)))

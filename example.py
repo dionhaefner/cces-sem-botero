@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+"""
 #########################################################
 #
 #	example.py
@@ -11,6 +11,7 @@
 #	Licensed under BSD 2-Clause License
 #
 #########################################################
+"""
 
 import sys
 sys.path.insert(0, './src')

@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-
+"""
 #########################################################
 #
 #	animal.pyx
@@ -13,7 +13,7 @@
 #	Licensed under BSD 2-Clause License
 #
 #########################################################
-
+"""
 
 import numpy as np
 
@@ -38,8 +38,9 @@ ctypedef np.uint8_t BTYPE_t
 cdef int nE = len(model_constants["environments"])
 
 
-# implements a cython class Animal, that is also available outside of this module
+
 cdef class Animal:
+	"""Implements a cython class Animal, that is also available outside of this module"""
 	# properties of Animal, typed as C variables for speed
 	cdef object _constants
 	cdef double h,s,a,I0,I0p,b,bp,m,ma
@@ -51,6 +52,7 @@ cdef class Animal:
 	cdef public int position
 
 	def __init__(self,np.ndarray[double,ndim=1] parent_genes=np.array([]),int position=nE+1):
+		"""Constructor"""
 		self._constants = model_constants
 		if not parent_genes.size: # empty argument -> random genes (default)
 			self.genes = random_genes()
@@ -67,8 +69,7 @@ cdef class Animal:
 # PUBLIC METHODS			
 
 	cpdef react(self,np.ndarray[double,ndim=1] E,np.ndarray[double,ndim=1] C,BTYPE_t evolve_all=0):
-	# Animal migrates and reacts to environment E and cue C. If evolve_all is set, reaction takes place
-	# for all animals, regardless of gene 'a'.
+		"""Animal migrates and reacts to environment E and cue C. If evolve_all is set, reaction takes place for all animals, regardless of gene 'a'."""
 		cdef np.ndarray[DTYPE_t,ndim=1] positions
 		cdef int new_position
 		cdef float new_insulation
@@ -96,7 +97,7 @@ cdef class Animal:
 
 
 	cpdef lifetime_payoff(self,np.ndarray[DTYPE_t] positions):
-	# Assembles the lifetime payoff of the animal
+		"""Assembles the lifetime payoff of the animal"""
 		cdef double scale_factor
 		cdef double tau = self._constants["tau"]
 		if len(positions) > 1:
@@ -111,7 +112,7 @@ cdef class Animal:
 
 
 	cpdef mutate(self):
-	# Causes the Animal's genes to mutate
+		"""Causes the Animal's genes to mutate"""
 		cdef np.ndarray[double,ndim=1] new_genes = self.genes
 		cdef int k
 		cdef double r, mutation_step
@@ -135,12 +136,14 @@ cdef class Animal:
 		return new_genes
 
 
-	# allows the genes of the animal to be read and written from python by calling animal.gene_dict or animal.genes
+
 	property gene_dict:
+		"""Allows the genes of the animal to be read from python as a dict by calling animal.gene_dict"""
 		def __get__(self):
 			return {"h":self.h,"s":self.s,"a":self.a,"I0":self.I0,"I0p":self.I0p,"b":self.b,"bp":self.bp,"m":self.m,"ma":self.ma}
 
 	property genes:
+		"""Allows the genes of the animal to be read and written from python as a list by calling animal.genes"""
 		def __get__(self):
 			return np.array([self.h,self.s,self.a,self.I0,self.I0p,self.b,self.bp,self.m,self.ma])
 
@@ -148,8 +151,7 @@ cdef class Animal:
 			self.set_genes(genes)
 
 	cdef set_genes(self,np.ndarray[double,ndim=1] genes):
-	# Checks every single gene if it is being limited or not. This may look messy, but is much faster than
-	# any loop implementation.
+		"""Checks every single gene if it is being limited or not. This may look messy, but is much faster than any loop implementation."""
 
 		if not ("h" in self._constants["limit"]):
 			self.h = genes[0]
@@ -200,7 +202,7 @@ cdef class Animal:
 # PROTECTED FUNCTIONS
 
 cdef inline double scale(double x):
-# Defines the scale function, decreasing gene efficiency for extreme values
+	"""Defines the scale function, decreasing gene efficiency for extreme values"""
 	if x < 0:
 		return -1*c_log(c_abs(x)+1)/c_log(3)
 	else:
@@ -208,8 +210,8 @@ cdef inline double scale(double x):
 
 
 cdef inline np.ndarray[double,ndim=1] random_genes():
-# Returns random values for the 9 genes in the chosen intervals:
-# h: 1, s: [0,1], a: [0,1], I0: [-1,1], I0p: [-1,1], b: [-2,2], bp: [-2,2], m: 0, ma: 0
+	"""Returns random values for the 9 genes in the chosen intervals:
+	h: 1, s: [0,1], a: [0,1], I0: [-1,1], I0p: [-1,1], b: [-2,2], bp: [-2,2], m: 0, ma: 0"""
 	cdef np.ndarray[double,ndim=1] rand_numbers, rand_genes 
 	rand_numbers = np.array([randnum() for _ in np.arange(9)])
 	rand_genes = [0,1,1,2,2,4,4,0,0]*rand_numbers+[1,0,0,-1,-1,-2,-2,0,0]
@@ -219,5 +221,5 @@ cdef inline np.ndarray[double,ndim=1] random_genes():
 	return rand_genes
 
 cdef inline double randnum():
-# Yields random numbers at C speed
+	"""Returns random numbers at C speed"""
 	return c_rand() / float(RAND_MAX)

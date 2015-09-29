@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+"""
 #########################################################
 #
 #   iterate_population.py
@@ -11,21 +11,12 @@
 #   Licensed under BSD 2-Clause License
 #
 #########################################################
-
+"""
 
 # Import third party libraries
 import numpy as np 
-import matplotlib.pyplot as plt
-import pandas as pd
 import time
 import sys
-
-# Seaborn makes prettier plots, but is not installed in a fresh Anaconda python
-try: 
-    import seaborn as sns
-    have_seaborn = True
-except ImportError:
-    have_seaborn = False
 
 # Import other parts of the project
 from animal import Animal
@@ -36,27 +27,24 @@ from output_population import output_population, plot_size
 
 
 def iterate_population(k,population,environments,f1,f2,path,t=0,variable=False):
-
-# MAIN CONTROLLER
-# Inputs:
-#   k: population counter,  population: the Population instance to be iterated,
-#   environments: Environment instances to be operated on,
-#   f1: pointer to output file for gene means,  f2: for gene standard deviations,
-#   path: path to the output files  t: initial time,   
-#   variable: variable population size
+    """ 
+    MAIN CONTROLLER
+    Inputs:
+        k: population counter,  population: the Population instance to be iterated,
+        environments: Environment instances to be operated on,
+        f1: pointer to output file for gene means,  f2: for gene standard deviations,
+        path: path to the output files  t: initial time,   
+        variable: variable population size
+    """
 
     constants = model_constants
     nE = len(environments)
 
     for j in np.arange(constants["generations"]):
+        # MAIN TIME STEP LOOP
         start = time.clock()
 
-        # output previous population
         output_population(population,f1,f2,j,k,path,False,t,environments)
-
-        ###################################
-        # THIS IS WHERE THE MAGIC HAPPENS #
-        ###################################
 
         for _ in range(constants["L"]):
             E, C = np.empty(nE), np.empty(nE)
@@ -78,12 +66,11 @@ def iterate_population(k,population,environments,f1,f2,path,t=0,variable=False):
 
         population.react(E,C,1)
 
-        # \end{magic}
-
         end = time.clock()
         if constants["verbose"]:
             print("Computation time: {0:.2e}s".format(end-start))
 
+	    # Print progress bar
         percent = float(j+1) / constants["generations"]
         hashes = '#' * int(round(percent * 20))
         spaces = ' ' * (20 - len(hashes))

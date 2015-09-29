@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
-
+"""
 #########################################################
 #
 #	constants.py
@@ -12,40 +12,40 @@
 #	Usage:
 #		from constants import model_constants
 #	model_constants is then a dict containing all the 
-#	parameters
+#	parameters.
 #
 #	Licensed under BSD 2-Clause License
 #
 #########################################################
-
+"""
 
 # --------------------------
 # SETS AVAILABLE MODEL PARAMETERS, THEIR TYPE, DEFAULT VALUE AND DESCRIPTION
 # Change default values here
 
 _PARAMETERS = [
-			("population_size",int,5000,"number of animals per population"),
-			("generations",int,1000,"number of generations per run"),
-			("L",int,5,"life time of each animal in time steps"),
-			("kd",float,0.02,"constant cost of plasticity"),
-			("ka",float,0.01,"cost of each adaptation"),
-			("tau",float,0.25,"coefficient of lifetime payoff exponential"),
-			("q",float,2.2,"controls expected number of offspring in variable scenario"),
-			("mu",float,1E-3,"mutation rate of the genes"),
-			("environments",float,[[1E2,0.1,0.6,0.,0.],
-						[1E2,.7,1.0,0.,0.5],
-						[1E2,.5,1.0,0.,-0.7]], "parameters of each environment "+
-                                                		            "in the form R P A B O"),
-			("environment_names",str,["moderate",
-							"warm",
-							"cold"],"displayed name of each environment"),
-			("km",float,0.2,"cost of migration"),
-			("limit",str,"m","names of genes that should be limited to [0,1]"),
-			("populations",int,1,"number of identical populations per run"),
-			("plot_every",int,0,"detailed output is plotted every N generations (0 = never)"),
-			("verbose",bool,False,"verbose output to command line")
+		("population_size",int,5000,"number of animals per population"),
+		("generations",int,1000,"number of generations per run"),
+		("L",int,5,"life time of each animal in time steps"),
+		("kd",float,0.02,"constant cost of plasticity"),
+		("ka",float,0.01,"cost of each adaptation"),
+		("tau",float,0.25,"coefficient of lifetime payoff exponential"),
+		("q",float,2.2,"controls expected number of offspring in variable scenario"),
+		("mu",float,1E-3,"mutation rate of the genes"),
+		("environments",float,[[1E2,0.1,0.6,0.,0.],
+					[1E2,.7,1.0,0.,0.5],
+					[1E2,.5,1.0,0.,-0.7]], "parameters of each environment "+
+                                               		            "in the form R P A B O"),
+		("environment_names",str,["moderate",
+						"warm",
+						"cold"],"displayed name of each environment"),
+		("km",float,0.2,"cost of migration"),
+		("limit",str,"m","names of genes that should be limited to [0,1]"),
+		("populations",int,1,"number of identical populations per run"),
+		("plot_every",int,0,"detailed output is plotted every N generations (0 = never)"),
+		("verbose",bool,False,"triggers verbose output to command line")
 
-		]
+]
 # --------------------------
 
 import argparse
@@ -62,9 +62,8 @@ _VARIABLE_PARAMETERS = [
 			("std_file",str,"","specifies the path to the file containing the std. dev. of the input genes")
 		]
 
-
-# Implement class for containing constants
 class ModelConstants(dict):
+	"""Implement class for containing constants"""
 	def __init__(self):
 		super(ModelConstants,self).__init__()
 		for param in _PARAMETERS:
@@ -125,7 +124,7 @@ for i,key in enumerate(["R","P","A","B","O"]):
 		for env in environments:
 			env[i] = args[key][i]
 
-# Output some information
+# Print some information
 print("\nRunning model with the following parameters:")
 for key in _PARAMETERS:
 	print("\t{0}: {1}".format(key[0],model_constants[key[0]]))
