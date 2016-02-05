@@ -5,23 +5,23 @@
 #
 #   output_population.py
 #   Author: Dion Häfner (dionhaefner@web.de)
-#   
+#
 #   Responsible for output and plotting
-#   
+#
 #   Licensed under BSD 2-Clause License
 #
 #########################################################
 """
 
 # Import third-party libraries
-import numpy as np 
-import matplotlib.pyplot as plt 
+import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 import warnings
 
 # Seaborn makes prettier plots, but is not installed in a fresh Anaconda python
-try: 
-    import seaborn as sns 
+try:
+    import seaborn as sns
     have_seaborn = True
 except ImportError:
     have_seaborn = False
@@ -36,7 +36,7 @@ from constants import model_constants
 def output_population(population,f1,f2,j,k,path,force_plot,t,env):
     """
     Outputs state of the Population. Inputs:
-        population: instance of Population to be output, 
+        population: instance of Population to be output,
         f1: file handle for mean gene file, f2: file handle for standard dev. of genes
         j: current generation counter, k: current population counter,
         path: output path, timeseries: whether complex output should be saved,
@@ -87,7 +87,7 @@ def plot_situation(t,data,nPerPos,env,filename):
     	print("\nPlotting ...")
 
     nE = len(constants["environments"])
-    
+
     plt.figure(figsize=(20,15))
     ax = plt.subplot2grid((5,nE),(0,0),colspan=nE)
     if have_seaborn:
@@ -108,14 +108,14 @@ def plot_situation(t,data,nPerPos,env,filename):
     for i in range(nE):
         if (nPerPos[i] > 0):
             ax = plt.subplot2grid((5,nE),(1,i),rowspan=2)
-        
+
             if have_seaborn:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     sns.violinplot(data=data[i],ax=ax,scale='width')
             else:
                 data[i].boxplot(ax=ax)
-        
+
             ax.set_ylim(-2,2)
 
             ax1 = plt.subplot2grid((5,nE),(3,i),rowspan=2)
@@ -144,7 +144,7 @@ def plot_size(path,fi,k):
         if i == 0:
             nE = int(row)
         if row[0]=="n":
-            data = np.genfromtxt(fi,skiprows=i+1,delimiter=",")
+            data = np.genfromtxt(fi,skip_header=i+1,delimiter=",")
             break
 
     sizes = data[:,-1].reshape(-1,nE)

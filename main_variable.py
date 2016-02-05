@@ -5,7 +5,7 @@
 #
 #	main_variable.py
 #	Author: Dion Häfner (dionhaefner@web.de)
-#	
+#
 #	Main controller, with variable population size
 #
 #	Usage:
@@ -34,7 +34,7 @@ import warnings # To warn the user
 import csv # For file operations
 
 try: # Seaborn makes prettier plots, but is not installed in a fresh Anaconda python
-	import seaborn as sns 
+	import seaborn as sns
 	have_seaborn = True
 except ImportError:
 	have_seaborn = False
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 	# create output directory
 	now = datetime.datetime.today()
 	path = "./output_variable/{0}/{1:%y}-{1:%m}-{1:%d}_{1:%H}-{1:%M}-{1:%S}/".format(f_mean,now)
-	try: 
+	try:
 		os.makedirs(path)
 		os.makedirs(path+"timeseries/")
 	except OSError:
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 				if i == 0:
 					nE = int(row[0])
 				elif row[0]=="n":
-					data = np.genfromtxt(f_mean,skiprows=i+1,delimiter=",")
+					data = np.genfromtxt(f_mean,skip_header=i+1,delimiter=",")
 					break
 				elif (row[0][0]!="R") & (i > 1):
 					env.append(list(map(float,row)))
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 	sizes = data[-nE:,-1].reshape(nE)
 	final_t = data[-1,0]*constants["L"]*env[0][0]/constants["environments"][0][0]
 
-	data = np.genfromtxt(f_std,skiprows=i+1,delimiter=",")
+	data = np.genfromtxt(f_std,skip_header=i+1,delimiter=",")
 	std_genes = data[-nE:,1:-1]
 	std_genes = np.fabs(std_genes)
 
@@ -122,11 +122,11 @@ if __name__ == '__main__':
 		f1 = open(path+"pop"+str(k+1)+"_mean_genes.csv",'w')
 		f1.write("{0}\n\n".format(nE))
 		f1.write("n,environment,I0,I0p,a,b,bp,h,s,m,ma,size\n")
-		
+
 		f2 = open(path+"pop"+str(k+1)+"_std_genes.csv",'w')
 		f2.write("{0}\n\n".format(nE))
 		f2.write("n,environment,I0,I0p,a,b,bp,h,s,m,ma,size\n")
-			
+
 		# create animals with the mean genes that shall be tested for each environment
 		animals=[]
 		for i in range(nE):
@@ -142,11 +142,11 @@ if __name__ == '__main__':
 					genes.append(mean_genes[i,j]*np.ones(sizes[i]))
 			animals.append([Animal(np.array(genes),i) for genes in zip(*genes)])
 		animals = [item for sublist in animals for item in sublist] # flatten animal list
-			
+
 		# create a population of population_size animals that have the correct mean genes
 		population = Population(constants["population_size"],animals)
-		
-		
+
+
 		f3.write("Population {0}".format(k+1))
 		pop_mean, pop_std, final_gen = iterate_population(k,population,environments,f1,f2,path,final_t,True)
 		end = time.clock()
@@ -154,11 +154,11 @@ if __name__ == '__main__':
 
 		if pop_mean is None:
 			if not constants["verbose"]:
-				print("\n\tDied out! Total time: {0:.2f} min\n".format((end-start)/60)) 
+				print("\n\tDied out! Total time: {0:.2f} min\n".format((end-start)/60))
 			f3.write(" died at generation {0}!\n".format(final_gen))
 		else:
 			if not constants["verbose"]:
-				print("\n\tSurvived! Total time: {0:.2f} min\n".format((end-start)/60)) 
+				print("\n\tSurvived! Total time: {0:.2f} min\n".format((end-start)/60))
 			survival_rate = survival_rate+1
 			f3.write(" survived!\n")
 
@@ -168,3 +168,4 @@ if __name__ == '__main__':
 			print("---------------------------------------\n")
 
 	f3.write("\n\nIn total, {0}/{1} Populations survived.".format(survival_rate,constants["populations"]))
+	f3.close()
