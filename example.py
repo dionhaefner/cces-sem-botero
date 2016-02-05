@@ -5,7 +5,7 @@
 #
 #	example.py
 #	Author: Dion Häfner (dionhaefner@web.de)
-#	
+#
 #	Demonstrates the usage of custom classes
 #
 #	Licensed under BSD 2-Clause License
@@ -24,7 +24,7 @@ import numpy as np # For efficient array operations
 import matplotlib.pyplot as plt # For plotting
 
 try: # Seaborn makes prettier plots, but is not installed in a fresh Anaconda python
-	import seaborn as sns 
+	import seaborn as sns
 	have_seaborn = True
 except ImportError:
 	have_seaborn = False
@@ -49,7 +49,7 @@ genes = np.array([1.512,2,3,4,5,6,7,8,9])
 duck = Animal(genes,0)
 
 print(duck.genes)
-print(duck.genes['I0'])
+print(duck.gene_dict['I0'])
 print(duck.mismatch)
 
 # To create an Animal with randomly drawn genes, just omit the argument:
@@ -57,13 +57,8 @@ random_duck = Animal()
 print(random_duck.gene_dict)
 print(random_duck.genes)
 
-# These raise an error:
-# wrong_duck = Animal([1,2,3,4,5,6,7,8,9]) - argument must be a 'Genome'
-# wrong_genes = Genome([1,2,3,4,5,6]) - argument is too short
-
 # Mutate an Animal's genes
 print(random_duck.mutate())
-
 
 # Create an Environment
 R, P, A, B, O = 10, 0.5, 1, 0.5, 0
@@ -75,14 +70,14 @@ E,C = test_env.evaluate(t)
 
 # E and C must be of type list of float to allow for multiple environments
 # Consider three equal environments:
-E,C = [E,E,E], [C,C,C]
+E,C = np.array([E,E,E]), np.array([C,C,C])
 
 # Let the animals react to the environment
 random_duck.react(E,C)
 
 # Access some information about the animal
 print(random_duck.mismatch)
-print(random_duck.lifetime_payoff([1000]))
+print(random_duck.lifetime_payoff(np.array([1000])))
 
 # Create some more animals and combine them to a Population
 more_ducks = [Animal(),Animal(),Animal()]
